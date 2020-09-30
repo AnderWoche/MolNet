@@ -23,11 +23,7 @@ public class MessageExchangerManager {
             if (trafficID != null) {
                 String id = trafficID.id();
                 try {
-//                    MethodHandle virtual = lookup.findVirtual(massageExchanger.getClass(), m.getName(), // findVirtual
-//                            MethodType.methodType(void.class, ChannelHandlerContext.class, ByteBuf.class));
-//                    virtual = virtual.asType(MethodType.methodType(ChannelHandlerContext.class, ByteBuf.class));
-
-                    MethodHandle virtual = MethodHandles.lookup().unreflect(m);
+                    MethodHandle virtual = lookup.unreflect(m);
 
                     this.idMethods.put(id, virtual);
                     this.idObjects.put(id, massageExchanger);
@@ -38,22 +34,34 @@ public class MessageExchangerManager {
         }
     }
 
-    public void exec(String id, ChannelHandlerContext ctx, ByteBuf byteBuf) {
+    /**
+     *
+     * @param id the Method id.
+     * @param ctx The Connection
+     * @param byteBuf the Message
+     * @return return true if exec was successfull
+     */
+    public boolean exec(String id, ChannelHandlerContext ctx, ByteBuf byteBuf) {
         assert ctx != null;
         assert byteBuf != null;
-        try {
-            MethodHandle methodHandle = this.idMethods.get(id);
-            Object object = this.idObjects.get(id);
+
+        MethodHandle methodHandle = this.idMethods.get(id);
+        if(methodHandle != null) {
+            try {
+                Object object = this.idObjects.get(id);
 
 //            warum geht das nicht?
 //            Boolean b = (Boolean) methodHandle.invokeExact(massageExchanger, Boolean.class, ctx, byteBuf);
 
-            methodHandle.invoke(object, ctx, byteBuf);
+                methodHandle.invoke(object, ctx, byteBuf);
 
 //            this.methods.get(id).invokeWithArguments(ctx, byteBuf);
-        } catch (Throwable throwable) {
-            throwable.printStackTrace();
+                return true;
+            } catch (Throwable throwable) {
+                throwable.printStackTrace();
+            }
         }
+        return false;
     }
 
 }

@@ -1,7 +1,8 @@
 package de.moldiy.molnet.server;
 
-import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.SerializationException;
+import com.google.common.eventbus.EventBus;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import de.moldiy.molnet.NettyByteBufUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -11,11 +12,12 @@ public abstract class AuthenticateValidatorHandler extends SimpleChannelInboundH
 
 //	private ChannelGroup spaceServer = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
-	private final Json j = new Json();
+	private final Gson j = new Gson();
+
+	private final EventBus eventBus = new EventBus();
 
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) {
-			// TODO ich weis noch nicht ob das Thread safe ist muss vieleicht aendern.
 
 			String loginString;
 			try {
@@ -28,8 +30,8 @@ public abstract class AuthenticateValidatorHandler extends SimpleChannelInboundH
 
 			String[] args;
 			try {
-				args = j.fromJson(String[].class, loginString);
-			} catch (SerializationException e) {
+				args = j.fromJson(loginString, String[].class);
+			} catch (JsonSyntaxException e) {
 				this.sendLoginUnSuccessfulMassage(ctx);
 				this.loginUnSuccessful(ctx);
 				return;
@@ -59,6 +61,10 @@ public abstract class AuthenticateValidatorHandler extends SimpleChannelInboundH
 	public abstract void loginSuccessful(ChannelHandlerContext ctx, String[] args);
 
 	public abstract void loginUnSuccessful(ChannelHandlerContext ctx);
+
+	public EventBus getEventBus() {
+		return eventBus;
+	}
 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {

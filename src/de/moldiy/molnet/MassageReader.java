@@ -12,7 +12,7 @@ public class MassageReader extends ReplayingDecoder<ByteBuf> {
     private final static int MAX_MASSSAGE_SIZE = 500_000; // this is 500KB
 
     @Override
-    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) {
 
         int nextMassageSize = in.readInt();
 

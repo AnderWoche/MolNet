@@ -14,7 +14,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 /**
  * @author David Humann (Moldiy)
  */
-public abstract class Client extends AuthenticateHandler {
+public class Client extends AuthenticateHandler {
 
 	private final Client that = this;
 

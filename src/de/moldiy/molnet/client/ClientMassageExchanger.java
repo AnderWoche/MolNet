@@ -8,12 +8,11 @@ public class ClientMassageExchanger {
     private Client c;
 
     public void write(String trafficID, ByteBuf byteBuf) {
-        c.getChannel().write(NettyByteBufUtil.addStringBeforeMassage(trafficID, byteBuf));
+        c.write(trafficID, byteBuf);
     }
 
     public void writeAndFlush(String trafficID, ByteBuf byteBuf) {
-        this.write(trafficID, byteBuf);
-        c.getChannel().flush();
+        this.writeAndFlush(trafficID, byteBuf);
     }
 
     public void flush() {

@@ -4,7 +4,9 @@ import de.moldiy.molnet.NettyByteBufUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 
-public abstract class ServerMessageExchanger {
+public abstract class ServerMessageExchanger<T> {
+
+    private T t;
 
     private Server s;
 
@@ -23,5 +25,9 @@ public abstract class ServerMessageExchanger {
 
     public Server getServer() {
         return s;
+    }
+
+    public T geT() {
+        return this.t;
     }
 }

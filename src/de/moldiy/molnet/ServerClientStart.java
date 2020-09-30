@@ -10,7 +10,6 @@ public class ServerClientStart {
 
     private int port;
 
-
     public static void main(String[] args) throws InterruptedException {
         int port = 9745;
 
@@ -36,10 +35,10 @@ public class ServerClientStart {
             }
         };
 
-        s.loadMessageExchanger(new ServerMessageExchanger() {
+        s.loadMessageExchanger(new ServerMessageExchanger<Client>() {
             @TrafficID(id = "cords")
             public void setCords(ChannelHandlerContext ctx, ByteBuf byteBuf) {
-                System.out.println("jaaa");
+                System.out.println("jaas");
             }
         });
 
@@ -49,7 +48,7 @@ public class ServerClientStart {
         c.connectAndAuth("lol", "eins");
         c.authenticate("username", "pw");
 
-        c.writeAndFlush("cords", c.getChannel().alloc().buffer().writeInt(100));
+        c.writeAndFlush("cords1", c.getChannel().alloc().buffer().writeInt(100));
 
 //		new SpaceClient("localhost", port);
 

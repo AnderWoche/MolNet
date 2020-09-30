@@ -1,11 +1,11 @@
 package de.moldiy.molnet.server;
 
 
-import de.moldiy.molnet.MassageReader;
-import de.moldiy.molnet.MassageWriter;
-import de.moldiy.molnet.MessageExchangerManager;
-import de.moldiy.molnet.MessageHandler;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+import de.moldiy.molnet.*;
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -17,16 +17,13 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
-public abstract class Server extends AuthenticateValidatorHandler {
+public class Server extends AuthenticateValidatorHandler {
 
     private final Server that = this;
 
-    private ServerBootstrap serverBootstrap;
+    private final ServerBootstrap serverBootstrap;
 
-    private int port;
-
-    private final EventLoopGroup bossGroup = new NioEventLoopGroup();
-    private final EventLoopGroup workerGroup = new NioEventLoopGroup();
+    private final int port;
 
     private final ChannelGroup allClients = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
@@ -37,6 +34,8 @@ public abstract class Server extends AuthenticateValidatorHandler {
     public Server(int port) {
         this.port = port;
         this.serverBootstrap = new ServerBootstrap();
+        EventLoopGroup bossGroup = new NioEventLoopGroup();
+        EventLoopGroup workerGroup = new NioEventLoopGroup();
         this.serverBootstrap.group(bossGroup, workerGroup);
         this.serverBootstrap.channel(NioServerSocketChannel.class);
         this.serverBootstrap.childHandler(new ChannelInitializer<NioSocketChannel>() {
@@ -56,6 +55,11 @@ public abstract class Server extends AuthenticateValidatorHandler {
         this.serverBootstrap.childOption(ChannelOption.SO_KEEPALIVE, true);
     }
 
+    @Subscribe
+    public void loginin(ChannelHandlerContext ctx, String[] args) {
+
+    }
+
     public void bind() {
         try {
             this.serverBootstrap.bind(port).sync();
@@ -66,6 +70,19 @@ public abstract class Server extends AuthenticateValidatorHandler {
 
     public void loadMessageExchanger(ServerMessageExchanger serverMessageExchanger) {
         this.exchangerManager.loadMassageExchanger(serverMessageExchanger);
+    }
+
+    public void broadCastMassage(String trafficID, ByteBuf byteBuf) {
+        this.getAllClients().writeAndFlush(NettyByteBufUtil.addStringBeforeMassage(trafficID, byteBuf));
+    }
+
+    public void write(ChannelHandlerContext ctx, String trafficID, ByteBuf byteBuf) {
+        ctx.channel().write(NettyByteBufUtil.addStringBeforeMassage(trafficID, byteBuf));
+    }
+
+    public void writeAndFlush(ChannelHandlerContext ctx, String trafficID, ByteBuf byteBuf) {
+        this.write(ctx, trafficID, byteBuf);
+        ctx.flush();
     }
 
     @Override

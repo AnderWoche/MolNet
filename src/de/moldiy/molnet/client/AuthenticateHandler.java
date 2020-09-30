@@ -1,6 +1,6 @@
 package de.moldiy.molnet.client;
 
-import com.badlogic.gdx.utils.Json;
+import com.google.gson.Gson;
 import de.moldiy.molnet.NettyByteBufUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -8,7 +8,8 @@ import io.netty.channel.SimpleChannelInboundHandler;
 
 public abstract class AuthenticateHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
-    private final Json j = new Json();
+    private final Gson j = new Gson();
+
     private ChannelHandlerContext ctx;
 
     @Override
