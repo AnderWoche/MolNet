@@ -2,6 +2,11 @@ apply plugin: 'java-library'
 //apply plugin: 'java'
 sourceCompatibility = '1.14'
 
+sourceSets {
+    main.java.srcDirs = ['src']
+    //main.resources.srcDirs = ['src/resources']
+}
+
 repositories {
     mavenLocal()
     mavenCentral()
