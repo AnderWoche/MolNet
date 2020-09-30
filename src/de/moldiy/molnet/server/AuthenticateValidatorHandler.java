@@ -1,8 +1,8 @@
-package de.moldiy.spaceexplorer.server;
+package de.moldiy.molnet.server;
 
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.SerializationException;
-import de.moldiy.spaceexplorer.NettyByteBufUtil;
+import de.moldiy.molnet.NettyByteBufUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;

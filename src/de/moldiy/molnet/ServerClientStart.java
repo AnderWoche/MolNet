@@ -1,6 +1,8 @@
-package de.moldiy.spaceexplorer;
+package de.moldiy.molnet;
 
-import com.sun.security.ntlm.Client;
+import de.moldiy.molnet.client.Client;
+import de.moldiy.molnet.server.Server;
+import de.moldiy.molnet.server.ServerMessageExchanger;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 

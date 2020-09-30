@@ -1,4 +1,4 @@
-package de.moldiy.spaceexplorer.server;
+package de.moldiy.molnet.server;
 
 import io.netty.channel.ChannelHandlerContext;
 

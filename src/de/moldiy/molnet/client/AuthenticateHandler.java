@@ -1,7 +1,7 @@
-package de.moldiy.spaceexplorer.client;
+package de.moldiy.molnet.client;
 
 import com.badlogic.gdx.utils.Json;
-import de.moldiy.spaceexplorer.NettyByteBufUtil;
+import de.moldiy.molnet.NettyByteBufUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;

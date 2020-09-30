@@ -1,8 +1,7 @@
-package de.moldiy.spaceexplorer;
+package de.moldiy.molnet;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 public class MessageHandler extends SimpleChannelInboundHandler<ByteBuf> {

@@ -1,4 +1,4 @@
-package de.moldiy.spaceexplorer;
+package de.moldiy.molnet;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;

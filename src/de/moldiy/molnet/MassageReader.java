@@ -1,4 +1,4 @@
-package de.moldiy.spaceexplorer;
+package de.moldiy.molnet;
 
 import java.util.List;
 

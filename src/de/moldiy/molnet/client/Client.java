@@ -1,7 +1,6 @@
-package de.moldiy.spaceexplorer.client;
+package de.moldiy.molnet.client;
 
-import de.moldiy.spaceexplorer.*;
-import de.moldiy.spaceexplorer.server.ServerMessageExchanger;
+import de.moldiy.molnet.*;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;

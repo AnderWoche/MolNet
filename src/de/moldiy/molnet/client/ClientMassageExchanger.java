@@ -1,6 +1,6 @@
-package de.moldiy.spaceexplorer.client;
+package de.moldiy.molnet.client;
 
-import de.moldiy.spaceexplorer.NettyByteBufUtil;
+import de.moldiy.molnet.NettyByteBufUtil;
 import io.netty.buffer.ByteBuf;
 
 public class ClientMassageExchanger {

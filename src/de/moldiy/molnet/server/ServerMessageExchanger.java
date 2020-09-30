@@ -1,6 +1,6 @@
-package de.moldiy.spaceexplorer.server;
+package de.moldiy.molnet.server;
 
-import de.moldiy.spaceexplorer.NettyByteBufUtil;
+import de.moldiy.molnet.NettyByteBufUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 

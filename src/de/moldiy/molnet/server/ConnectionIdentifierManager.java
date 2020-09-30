@@ -1,10 +1,8 @@
-package de.moldiy.spaceexplorer.server;
+package de.moldiy.molnet.server;
 
 import io.netty.channel.ChannelHandlerContext;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class ConnectionIdentifierManager {
