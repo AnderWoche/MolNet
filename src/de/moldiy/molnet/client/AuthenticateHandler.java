@@ -6,15 +6,18 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
-public abstract class AuthenticateHandler extends SimpleChannelInboundHandler<ByteBuf> {
+public class AuthenticateHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
     private final Gson j = new Gson();
 
     private ChannelHandlerContext ctx;
 
+    private boolean successfulAuthenticated = false;
+
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
         this.ctx = ctx;
+        this.successfulAuthenticated = false;
         super.handlerAdded(ctx);
     }
 
@@ -23,6 +26,7 @@ public abstract class AuthenticateHandler extends SimpleChannelInboundHandler<By
         byte success = msg.readByte();
         if (success == 1) {
             this.loginSuccessful(ctx);
+            this.successfulAuthenticated = true;
             ctx.pipeline().remove(this);
             return;
         }
@@ -30,6 +34,7 @@ public abstract class AuthenticateHandler extends SimpleChannelInboundHandler<By
     }
 
     public void authenticate(String... args) {
+        if(successfulAuthenticated) throw new AlreadySuccessfulAuthenticated("Authentication was already successful");
         ByteBuf byteBuf = this.ctx.alloc().buffer();
         String msg = j.toJson(args);
 
@@ -38,7 +43,15 @@ public abstract class AuthenticateHandler extends SimpleChannelInboundHandler<By
         ctx.writeAndFlush(byteBuf);
     }
 
-    public abstract void loginSuccessful(ChannelHandlerContext ctx);
+    public void loginSuccessful(ChannelHandlerContext ctx) {
+    }
 
-    public abstract void loginUnSuccessful(ChannelHandlerContext ctx);
+    public void loginUnSuccessful(ChannelHandlerContext ctx) {
+    }
+
+    public static class AlreadySuccessfulAuthenticated extends RuntimeException {
+        public AlreadySuccessfulAuthenticated(String s) {
+            super(s);
+        }
+    }
 }

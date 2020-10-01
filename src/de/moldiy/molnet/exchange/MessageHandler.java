@@ -1,6 +1,9 @@
-package de.moldiy.molnet;
+package de.moldiy.molnet.exchange;
 
+import de.moldiy.molnet.NettyByteBufUtil;
+import de.moldiy.molnet.exchange.MessageExchangerManager;
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -14,16 +17,22 @@ public class MessageHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
     public MessageHandler(MessageExchangerManager exchangerManager) {
         this.messageExchangerManager = exchangerManager;
+
+    }
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        super.channelActive(ctx);
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf) {
         String id = NettyByteBufUtil.readUTF16String(byteBuf);
         boolean success = this.messageExchangerManager.exec(id, channelHandlerContext, byteBuf);
-        if(success) {
+        if (success) {
             this.failedMessageCount = 0;
         } else {
-            if(this.failedMessageCount >= FAILED_MESSAGE_COUNT_FOR_DISCONNECT) {
+            if (this.failedMessageCount >= FAILED_MESSAGE_COUNT_FOR_DISCONNECT) {
                 channelHandlerContext.disconnect();
             }
         }

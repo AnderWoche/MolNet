@@ -1,24 +1,26 @@
-package de.moldiy.molnet.server;
+package de.moldiy.molnet.server.authenticate;
 
-import com.google.common.eventbus.EventBus;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.pploder.events.Event;
+import com.pploder.events.SimpleEvent;
 import de.moldiy.molnet.NettyByteBufUtil;
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
+@ChannelHandler.Sharable
 public abstract class AuthenticateValidatorHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
 //	private ChannelGroup spaceServer = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
 	private final Gson j = new Gson();
 
-	private final EventBus eventBus = new EventBus();
+	private final Event<AuthenticateEvent> userSuccessAuthenticatedEvent = new SimpleEvent<>();
 
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) {
-
 			String loginString;
 			try {
 				loginString = NettyByteBufUtil.readUTF16String(msg);
@@ -40,6 +42,7 @@ public abstract class AuthenticateValidatorHandler extends SimpleChannelInboundH
 			if(this.authenticate(args)) {
 				this.sendLoginSuccessfulMassage(ctx);
 				this.loginSuccessful(ctx, args);
+				this.userSuccessAuthenticatedEvent.trigger(new AuthenticateEvent(ctx, args));
 				ctx.pipeline().remove(this);
 			} else {
 				this.sendLoginUnSuccessfulMassage(ctx);
@@ -58,12 +61,12 @@ public abstract class AuthenticateValidatorHandler extends SimpleChannelInboundH
 		ctx.writeAndFlush(ctx.alloc().buffer().writeByte((byte) 0));
 	}
 
-	public abstract void loginSuccessful(ChannelHandlerContext ctx, String[] args);
+	public void loginSuccessful(ChannelHandlerContext ctx, String[] args){}
 
-	public abstract void loginUnSuccessful(ChannelHandlerContext ctx);
+	public void loginUnSuccessful(ChannelHandlerContext ctx){}
 
-	public EventBus getEventBus() {
-		return eventBus;
+	public Event<AuthenticateEvent> getUserSuccessAuthenticatedEvent() {
+		return userSuccessAuthenticatedEvent;
 	}
 
 	@Override

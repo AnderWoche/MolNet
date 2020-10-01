@@ -1,4 +1,4 @@
-package de.moldiy.molnet;
+package de.moldiy.molnet.exchange;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

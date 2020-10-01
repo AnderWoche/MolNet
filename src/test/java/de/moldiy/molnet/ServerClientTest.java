@@ -1,19 +1,21 @@
 package de.moldiy.molnet;
 
 import de.moldiy.molnet.client.Client;
+import de.moldiy.molnet.exchange.MessageExchanger;
+import de.moldiy.molnet.exchange.TrafficID;
 import de.moldiy.molnet.server.Server;
-import de.moldiy.molnet.server.ServerMessageExchanger;
+import de.moldiy.molnet.server.authenticate.AuthenticateValidatorHandler;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 
-public class ServerClientStart {
+public class ServerClientTest {
 
     private int port;
 
     public static void main(String[] args) throws InterruptedException {
         int port = 9745;
 
-        Server s = new Server(port) {
+        Server s = new Server(port, new AuthenticateValidatorHandler() {
             @Override
             public boolean authenticate(String[] args) {
                 if (args.length == 2) {
@@ -24,7 +26,6 @@ public class ServerClientStart {
                 return false;
             }
 
-            @Override
             public void loginSuccessful(ChannelHandlerContext ctx, String[] args) {
                 System.out.println("login successful!");
             }
@@ -33,9 +34,9 @@ public class ServerClientStart {
             public void loginUnSuccessful(ChannelHandlerContext ctx) {
                 System.out.println("login Unsuccessful -");
             }
-        };
+        });
 
-        s.loadMessageExchanger(new ServerMessageExchanger<Client>() {
+        s.loadMessageExchanger(new MessageExchanger<Server>() {
             @TrafficID(id = "cords")
             public void setCords(ChannelHandlerContext ctx, ByteBuf byteBuf) {
                 System.out.println("jaas");
@@ -44,11 +45,17 @@ public class ServerClientStart {
 
         s.bind();
 
-        Client c = new Client("localhost", port){};
+        Client c = new Client("localhost", port);
         c.connectAndAuth("lol", "eins");
         c.authenticate("username", "pw");
 
-        c.writeAndFlush("cords1", c.getChannel().alloc().buffer().writeInt(100));
+        c.writeAndFlush("cords", c.getChannel().alloc().buffer().writeInt(100));
+
+        c.authenticate("username", "pw");
+
+        Thread.sleep(1000);
+
+        c.getChannel().close();
 
 //		new SpaceClient("localhost", port);
 

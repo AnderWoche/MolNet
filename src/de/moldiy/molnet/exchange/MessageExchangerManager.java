@@ -1,4 +1,4 @@
-package de.moldiy.molnet;
+package de.moldiy.molnet.exchange;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -15,7 +15,7 @@ public class MessageExchangerManager {
     private final HashMap<String, MethodHandle> idMethods = new HashMap<>();
     private final HashMap<String, Object> idObjects = new HashMap<>();
 
-    public void loadMassageExchanger(Object massageExchanger) {
+    public synchronized void loadMassageExchanger(MessageExchanger massageExchanger) {
         assert massageExchanger != null;
         for (Method m : massageExchanger.getClass().getDeclaredMethods()) {
             m.setAccessible(true);
@@ -39,7 +39,7 @@ public class MessageExchangerManager {
      * @param id the Method id.
      * @param ctx The Connection
      * @param byteBuf the Message
-     * @return return true if exec was successfull
+     * @return return true if exec was successful
      */
     public boolean exec(String id, ChannelHandlerContext ctx, ByteBuf byteBuf) {
         assert ctx != null;
@@ -50,12 +50,8 @@ public class MessageExchangerManager {
             try {
                 Object object = this.idObjects.get(id);
 
-//            warum geht das nicht?
-//            Boolean b = (Boolean) methodHandle.invokeExact(massageExchanger, Boolean.class, ctx, byteBuf);
-
                 methodHandle.invoke(object, ctx, byteBuf);
 
-//            this.methods.get(id).invokeWithArguments(ctx, byteBuf);
                 return true;
             } catch (Throwable throwable) {
                 throwable.printStackTrace();

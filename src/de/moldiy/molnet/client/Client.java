@@ -1,10 +1,11 @@
 package de.moldiy.molnet.client;
 
 import de.moldiy.molnet.*;
+import de.moldiy.molnet.exchange.MessageHandler;
+import de.moldiy.molnet.exchange.NetworkExchanger;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -14,76 +15,79 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 /**
  * @author David Humann (Moldiy)
  */
-public class Client extends AuthenticateHandler {
+public class Client extends NetworkExchanger<Client> {
 
-	private final Client that = this;
+    private final Client that = this;
 
-	private final String host;
-	private final int port;
+    private final String host;
+    private final int port;
 
-	private final Bootstrap bootstrap;
+    private final Bootstrap bootstrap;
 
-	private Channel c;
+    private Channel c;
 
-	private final MessageExchangerManager exchangerManager = new MessageExchangerManager();
+    private final AuthenticateHandler authenticateHandler;
 
-	public Client(String host, int port) {
-		this.host = host;
-		this.port = port;
+    public Client(String host, int port, AuthenticateHandler authenticateHandler) {
+        this.host = host;
+        this.port = port;
+        this.authenticateHandler = authenticateHandler;
 
-		this.bootstrap = new Bootstrap();
-		this.bootstrap.group(new NioEventLoopGroup());
-		this.bootstrap.channel(NioSocketChannel.class);
-		this.bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
-		this.bootstrap.handler(new ChannelInitializer<SocketChannel>() {
-			protected void initChannel(SocketChannel ch) {
-				ch.pipeline().addFirst("decoder", new MassageReader());
-				ch.pipeline().addFirst("encoder", new MassageWriter());
+        this.bootstrap = new Bootstrap();
+        this.bootstrap.group(new NioEventLoopGroup());
+        this.bootstrap.channel(NioSocketChannel.class);
+        this.bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
+        this.bootstrap.handler(new ChannelInitializer<SocketChannel>() {
+            protected void initChannel(SocketChannel ch) {
+                ch.pipeline().addFirst("decoder", new MassageReader());
+                ch.pipeline().addFirst("encoder", new MassageWriter());
 
-				ch.pipeline().addLast("auth", that);
+                ch.pipeline().addLast("auth", authenticateHandler);
 
-				ch.pipeline().addLast("handler", new MessageHandler(exchangerManager));
-			};
-		});
-	}
+                ch.pipeline().addLast("handler", new MessageHandler(exchangerManager));
+            }
 
-	public void connect() throws InterruptedException {
-		this.c = this.bootstrap.connect(this.host, this.port).sync().channel();
-	}
+            ;
+        });
+    }
 
-	public void connectAndAuth(String... args) throws InterruptedException {
-		this.connect();
-		super.authenticate(args);
-	}
+    public Client(String host, int port) {
+        this(host, port, new AuthenticateHandler());
+    }
 
-	public void write(String trafficID, ByteBuf byteBuf) {
-		c.write(NettyByteBufUtil.addStringBeforeMassage(trafficID, byteBuf));
-	}
+    public void connect() throws InterruptedException {
+        this.c = this.bootstrap.connect(this.host, this.port).sync().channel();
+    }
 
-	public void writeAndFlush(String trafficID, ByteBuf byteBuf) {
-		this.write(trafficID, byteBuf);
-		c.flush();
-	}
+    public void connectAndAuth(String... args) throws InterruptedException {
+        this.connect();
+        this.authenticateHandler.authenticate(args);
+    }
 
-	public void flush() {
-		c.flush();
-	}
+    public void authenticate(String... args) {
+        this.authenticateHandler.authenticate(args);
+    }
 
-	public void loadMessageExchanger(ClientMassageExchanger clientMassageExchanger) {
-		this.exchangerManager.loadMassageExchanger(clientMassageExchanger);
-	}
+    public void write(String trafficID, ByteBuf byteBuf) {
+        c.write(NettyByteBufUtil.addStringBeforeMassage(trafficID, byteBuf));
+    }
 
-	@Override
-	public void loginSuccessful(ChannelHandlerContext ctx) {
+    public void writeAndFlush(String trafficID, ByteBuf byteBuf) {
+        this.write(trafficID, byteBuf);
+        c.flush();
+    }
 
-	}
+    public void flush() {
+        c.flush();
+    }
 
-	@Override
-	public void loginUnSuccessful(ChannelHandlerContext ctx) {
+    @Override
+    protected NetworkExchanger<Client> getNetworkExchanger() {
+        return this;
+    }
 
-	}
+    public Channel getChannel() {
+        return c;
+    }
 
-	public Channel getChannel() {
-		return c;
-	}
 }
