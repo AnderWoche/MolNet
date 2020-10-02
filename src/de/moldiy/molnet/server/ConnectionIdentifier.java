@@ -15,8 +15,10 @@ public abstract class ConnectionIdentifier<T> {
 
     public void addChannel(ChannelHandlerContext ctx, String... args) {
         T value = this.initIdentifier(ctx, args);
-        this.valueIdentifier.put(ctx, value);
-        this.identifierValue.put(value, ctx);
+        if (!this.valueIdentifier.containsKey(ctx)) {
+            this.valueIdentifier.put(ctx, value);
+            this.identifierValue.put(value, ctx);
+        }
     }
 
     public void removeChannel(ChannelHandlerContext ctx) {
@@ -32,5 +34,13 @@ public abstract class ConnectionIdentifier<T> {
 
     public T getIdentifierFromIdentifier(ChannelHandlerContext ctx) {
         return this.valueIdentifier.get(ctx);
+    }
+
+    public HashMap<ChannelHandlerContext, T> getValueIdentifier() {
+        return valueIdentifier;
+    }
+
+    public HashMap<T, ChannelHandlerContext> getIdentifierValue() {
+        return identifierValue;
     }
 }
