@@ -95,6 +95,10 @@ public class Server extends NetworkExchanger<Server> implements ChannelHandler {
     public void handlerAdded(ChannelHandlerContext ctx) {
     }
 
+    public ConnectionIdentifierManager getIdentifierManager() {
+        return identifierManager;
+    }
+
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) {
         this.identifierManager.removeConnection(ctx);
