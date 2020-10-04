@@ -1,8 +1,5 @@
 package de.moldiy.molnet.exchange;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
-
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
@@ -15,18 +12,27 @@ public class MessageExchangerManager {
     private final HashMap<String, MethodHandle> idMethods = new HashMap<>();
     private final HashMap<String, Object> idObjects = new HashMap<>();
 
-    public synchronized void loadMassageExchanger(MessageExchanger massageExchanger) {
-        assert massageExchanger != null;
-        for (Method m : massageExchanger.getClass().getDeclaredMethods()) {
+    public synchronized void loadMassageExchanger(Object object) {
+        assert object != null;
+        Class<?> objectClass = object.getClass();
+
+        Rights allMethodRights = objectClass.getAnnotation(Rights.class);
+
+        for (Method m : objectClass.getDeclaredMethods()) {
             m.setAccessible(true);
             TrafficID trafficID = m.getAnnotation(TrafficID.class);
             if (trafficID != null) {
                 String id = trafficID.id();
+                Rights rights = m.getAnnotation(Rights.class);
                 try {
-                    MethodHandle virtual = lookup.unreflect(m);
+                    MethodHandle methodHandle = lookup.unreflect(m);
 
-                    this.idMethods.put(id, virtual);
-                    this.idObjects.put(id, massageExchanger);
+                    if(rights != null) {
+
+                    }
+
+                    this.idMethods.put(id, methodHandle);
+                    this.idObjects.put(id, object);
                 } catch (Throwable e) {
                     e.printStackTrace();
                 }
@@ -34,28 +40,24 @@ public class MessageExchangerManager {
         }
     }
 
+
     /**
      *
      * @param id the Method id.
-     * @param ctx The Connection
-     * @param byteBuf the Message
+     * @param args The arguments from the Method.
      * @return return true if exec was successful
+     *
+     * @throws Throwable throws if something went wrong
      */
-    public boolean exec(String id, ChannelHandlerContext ctx, ByteBuf byteBuf) {
-        assert ctx != null;
-        assert byteBuf != null;
-
+    public boolean exec(String id, Object... args) throws Throwable {
         MethodHandle methodHandle = this.idMethods.get(id);
         if(methodHandle != null) {
-            try {
                 Object object = this.idObjects.get(id);
 
-                methodHandle.invoke(object, ctx, byteBuf);
+                methodHandle.invoke(object, args);
+
 
                 return true;
-            } catch (Throwable throwable) {
-                throwable.printStackTrace();
-            }
         }
         return false;
     }

@@ -28,7 +28,12 @@ public class MessageHandler extends SimpleChannelInboundHandler<ByteBuf> {
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf) {
         String id = NettyByteBufUtil.readUTF16String(byteBuf);
-        boolean success = this.messageExchangerManager.exec(id, channelHandlerContext, byteBuf);
+        boolean success = false;
+        try {
+            success = this.messageExchangerManager.exec(id, channelHandlerContext, byteBuf);
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
         if (success) {
             this.failedMessageCount = 0;
         } else {
