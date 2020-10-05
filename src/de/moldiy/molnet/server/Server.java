@@ -3,7 +3,6 @@ package de.moldiy.molnet.server;
 
 import de.moldiy.molnet.*;
 import de.moldiy.molnet.exchange.MessageHandler;
-import de.moldiy.molnet.exchange.NetworkExchanger;
 import de.moldiy.molnet.server.authenticate.AuthenticateValidatorHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
@@ -15,7 +14,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
-public class Server extends NetworkExchanger<Server> implements ChannelHandler {
+public class Server {
 
     private final Server that = this;
 
@@ -24,8 +23,6 @@ public class Server extends NetworkExchanger<Server> implements ChannelHandler {
     private final int port;
 
     private final ChannelGroup allClients = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-
-    private final ConnectionIdentifierManager identifierManager = new ConnectionIdentifierManager();
 
     public Server(int port, AuthenticateValidatorHandler authenticateValidatorHandler) {
         this.port = port;
@@ -40,11 +37,9 @@ public class Server extends NetworkExchanger<Server> implements ChannelHandler {
                 ch.pipeline().addFirst("decoder", new MassageReader());
                 ch.pipeline().addFirst("encoder", new MassageWriter());
 
-                ch.pipeline().addLast("channelTracker", that);
-
                 ch.pipeline().addLast("authenticate", authenticateValidatorHandler);
 
-                ch.pipeline().addLast("handler", new MessageHandler(exchangerManager));
+                ch.pipeline().addLast("handler", new MessageHandler());
 
                 allClients.add(ch);
             }
@@ -52,8 +47,6 @@ public class Server extends NetworkExchanger<Server> implements ChannelHandler {
         this.serverBootstrap.option(ChannelOption.SO_BACKLOG, 128);
         this.serverBootstrap.childOption(ChannelOption.SO_KEEPALIVE, true);
 
-        authenticateValidatorHandler.getUserSuccessAuthenticatedEvent().addListener(event ->
-                this.identifierManager.addConnection(event.ctx, event.args));
     }
 
     public Server(int port) {
@@ -86,27 +79,8 @@ public class Server extends NetworkExchanger<Server> implements ChannelHandler {
         ctx.flush();
     }
 
-    @Override
-    protected NetworkExchanger<Server> getNetworkExchanger() {
-        return this;
-    }
+    public void loadMessageExchanger(Object o) {
 
-    @Override
-    public void handlerAdded(ChannelHandlerContext ctx) {
-    }
-
-    public ConnectionIdentifierManager getIdentifierManager() {
-        return identifierManager;
-    }
-
-    @Override
-    public void handlerRemoved(ChannelHandlerContext ctx) {
-        this.identifierManager.removeConnection(ctx);
-    }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        ctx.fireExceptionCaught(cause);
     }
 
     public ChannelGroup getAllClients() {

@@ -33,6 +33,11 @@ public class ConnectionIdentifierManager {
         return this.identifier.get(identifierName).getChannelFromIdentifier(value);
     }
 
+    @SuppressWarnings("unchecked")
+    public <T> T getIdentifierFromConnection(String identifierName, ChannelHandlerContext ctx) {
+        return (T) this.identifier.get(identifierName).getIdentifierFromIdentifier(ctx);
+    }
+
     public HashMap<String, ConnectionIdentifier> getIdentifier() {
         return identifier;
     }

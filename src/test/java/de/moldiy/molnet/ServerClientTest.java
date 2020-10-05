@@ -1,7 +1,6 @@
 package de.moldiy.molnet;
 
 import de.moldiy.molnet.client.Client;
-import de.moldiy.molnet.exchange.MessageExchanger;
 import de.moldiy.molnet.exchange.TrafficID;
 import de.moldiy.molnet.server.Server;
 import de.moldiy.molnet.server.authenticate.AuthenticateValidatorHandler;
@@ -36,7 +35,9 @@ public class ServerClientTest {
             }
         });
 
-        s.loadMessageExchanger(new MessageExchanger<Server>() {
+        class MessageReceiver {
+        }
+        s.loadMessageExchanger(new MessageReceiver() {
             @TrafficID(id = "cords")
             public void setCords(ChannelHandlerContext ctx, ByteBuf byteBuf) {
                 System.out.println("jaas");

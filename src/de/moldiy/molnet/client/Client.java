@@ -2,7 +2,6 @@ package de.moldiy.molnet.client;
 
 import de.moldiy.molnet.*;
 import de.moldiy.molnet.exchange.MessageHandler;
-import de.moldiy.molnet.exchange.NetworkExchanger;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -15,7 +14,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 /**
  * @author David Humann (Moldiy)
  */
-public class Client extends NetworkExchanger<Client> {
+public class Client {
 
     private final Client that = this;
 
@@ -44,7 +43,7 @@ public class Client extends NetworkExchanger<Client> {
 
                 ch.pipeline().addLast("auth", authenticateHandler);
 
-                ch.pipeline().addLast("handler", new MessageHandler(exchangerManager));
+                ch.pipeline().addLast("handler", new MessageHandler());
             }
 
             ;
@@ -68,6 +67,10 @@ public class Client extends NetworkExchanger<Client> {
         this.authenticateHandler.authenticate(args);
     }
 
+    public void loadMessageExchanger(Object o) {
+
+    }
+
     public void write(String trafficID, ByteBuf byteBuf) {
         c.write(NettyByteBufUtil.addStringBeforeMassage(trafficID, byteBuf));
     }
@@ -79,11 +82,6 @@ public class Client extends NetworkExchanger<Client> {
 
     public void flush() {
         c.flush();
-    }
-
-    @Override
-    protected NetworkExchanger<Client> getNetworkExchanger() {
-        return this;
     }
 
     public Channel getChannel() {
