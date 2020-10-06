@@ -2,17 +2,14 @@ package de.moldiy.molnet.exchange;
 
 import de.moldiy.molnet.utils.BitVector;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 public class MessageExchangerManager {
 
-    private static final MethodHandles.Lookup lookup = MethodHandles.lookup();
-
-    private final HashMap<String, RightRestrictedMethod> idMethods = new HashMap<>();
-    private final HashMap<String, Object> idObjects = new HashMap<>();
+    private final Map<String, RightRestrictedMethodHandle> idMethods = Collections.synchronizedMap(new HashMap<>());
 
     private final RightIDFactory rightIDFactory;
 
@@ -22,26 +19,20 @@ public class MessageExchangerManager {
 
     public synchronized void loadMassageExchanger(Object object) {
         assert object != null;
-        Class<?> objectClass = object.getClass();
 
-        for (Method m : objectClass.getDeclaredMethods()) {
+        for (Method m : object.getClass().getDeclaredMethods()) {
             m.setAccessible(true);
-            TrafficID trafficID = m.getAnnotation(TrafficID.class);
-            if (trafficID != null) {
+
+            TrafficID trafficID;
+            if ((trafficID = m.getAnnotation(TrafficID.class)) != null) {
                 String id = trafficID.id();
-                MethodHandle methodHandle = null;
-                try {
-                    methodHandle = lookup.unreflect(m);
-                } catch (Throwable e) {
-                    e.printStackTrace();
-                }
-                this.idMethods.put(id, new RightRestrictedMethod(object, methodHandle, this.getRightFromMethod(object, m)));
-                this.idObjects.put(id, object);
+
+                this.idMethods.put(id, new RightRestrictedMethodHandle(object, m, this.getRightsFromMethod(object, m)));
             }
         }
     }
 
-    private BitVector getRightFromMethod(Object object, Method method) {
+    private BitVector getRightsFromMethod(Object object, Method method) {
         BitVector rightBits = new BitVector();
 
         Rights allMethodRights = object.getClass().getAnnotation(Rights.class);
@@ -57,23 +48,28 @@ public class MessageExchangerManager {
     }
 
 
+    public RightRestrictedMethodHandle getRightRestrictedMethodHandle(String id) {
+        RightRestrictedMethodHandle methodHandle = this.idMethods.get(id);
+        if(methodHandle == null) {
+            throw new TrafficIDNotExists("The TrafficID: " + id + " not exist!");
+        }
+        return methodHandle;
+    }
+
     /**
      * @param id   the Method id.
      * @param args The arguments from the Method.
-     * @return return true if exec was successful
      * @throws Throwable throws if something went wrong
      */
-    public boolean exec(String id, BitVector rightBits, Object... args) throws Throwable {
-        RightRestrictedMethod methodHandle = this.idMethods.get(id);
-        if (methodHandle != null) {
-            Object object = this.idObjects.get(id);
+    public void exec(String id, BitVector rightBits, Object... args) throws Throwable {
+        RightRestrictedMethodHandle methodHandle = this.getRightRestrictedMethodHandle(id);
+        methodHandle.invoke(rightBits, args);
+    }
 
-            methodHandle.invoke(rightBits, args);
-
-
-            return true;
+    public static class TrafficIDNotExists extends RuntimeException {
+        public TrafficIDNotExists(String message) {
+            super(message);
         }
-        return false;
     }
 
 }

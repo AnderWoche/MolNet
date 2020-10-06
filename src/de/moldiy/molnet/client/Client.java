@@ -1,7 +1,8 @@
 package de.moldiy.molnet.client;
 
-import de.moldiy.molnet.*;
-import de.moldiy.molnet.exchange.MessageHandler;
+import de.moldiy.molnet.MassageReader;
+import de.moldiy.molnet.MassageWriter;
+import de.moldiy.molnet.NettyByteBufUtil;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -14,7 +15,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 /**
  * @author David Humann (Moldiy)
  */
-public class Client {
+public abstract class Client extends ClientMessageHandler {
 
     private final Client that = this;
 
@@ -25,12 +26,11 @@ public class Client {
 
     private Channel c;
 
-    private final AuthenticateHandler authenticateHandler;
-
-    public Client(String host, int port, AuthenticateHandler authenticateHandler) {
+    public Client(String host, int port) {
         this.host = host;
         this.port = port;
-        this.authenticateHandler = authenticateHandler;
+
+        super.setClient(this);
 
         this.bootstrap = new Bootstrap();
         this.bootstrap.group(new NioEventLoopGroup());
@@ -41,34 +41,13 @@ public class Client {
                 ch.pipeline().addFirst("decoder", new MassageReader());
                 ch.pipeline().addFirst("encoder", new MassageWriter());
 
-                ch.pipeline().addLast("auth", authenticateHandler);
-
-                ch.pipeline().addLast("handler", new MessageHandler());
+                ch.pipeline().addLast("handler", that);
             }
-
-            ;
         });
-    }
-
-    public Client(String host, int port) {
-        this(host, port, new AuthenticateHandler());
     }
 
     public void connect() throws InterruptedException {
         this.c = this.bootstrap.connect(this.host, this.port).sync().channel();
-    }
-
-    public void connectAndAuth(String... args) throws InterruptedException {
-        this.connect();
-        this.authenticateHandler.authenticate(args);
-    }
-
-    public void authenticate(String... args) {
-        this.authenticateHandler.authenticate(args);
-    }
-
-    public void loadMessageExchanger(Object o) {
-
     }
 
     public void write(String trafficID, ByteBuf byteBuf) {
@@ -87,5 +66,4 @@ public class Client {
     public Channel getChannel() {
         return c;
     }
-
 }

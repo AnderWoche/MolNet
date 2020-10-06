@@ -2,14 +2,12 @@ package de.moldiy.molnet.server;
 
 import io.netty.channel.ChannelHandlerContext;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class ConnectionIdentifierManager {
 
-    private List<ConnectionIdentifier> identifierList = new ArrayList<>();
-    private HashMap<String, ConnectionIdentifier> identifier = new HashMap<>();
+    private List<ConnectionIdentifier> identifierList = Collections.synchronizedList(new ArrayList<>());
+    private Map<String, ConnectionIdentifier> identifier = Collections.synchronizedMap(new HashMap<>());
 
     public void registerConnectionIdentifier(String identifierName, ConnectionIdentifier<?> connectionIdentifier) {
         this.identifierList.add(connectionIdentifier);
@@ -35,14 +33,25 @@ public class ConnectionIdentifierManager {
 
     @SuppressWarnings("unchecked")
     public <T> T getIdentifierFromConnection(String identifierName, ChannelHandlerContext ctx) {
-        return (T) this.identifier.get(identifierName).getIdentifierFromIdentifier(ctx);
+        ConnectionIdentifier connectionIdentifier = this.identifier.get(identifierName);
+        if (connectionIdentifier == null) {
+            throw new IdentifierNotExistException("A ConnectionIdentifier with the name " + identifierName +
+                    " is not registered");
+        }
+        return (T) connectionIdentifier.getIdentifierFromIdentifier(ctx);
     }
 
-    public HashMap<String, ConnectionIdentifier> getIdentifier() {
+    public Map<String, ConnectionIdentifier> getIdentifier() {
         return identifier;
     }
 
     public List<ConnectionIdentifier> getIdentifierList() {
         return identifierList;
+    }
+
+    public static class IdentifierNotExistException extends RuntimeException {
+        public IdentifierNotExistException(String message) {
+            super(message);
+        }
     }
 }

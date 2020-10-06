@@ -1,9 +1,12 @@
 package de.moldiy.molnet;
 
 import de.moldiy.molnet.client.Client;
+import de.moldiy.molnet.exchange.MessageHandler;
+import de.moldiy.molnet.exchange.RightRestrictedMethodHandle;
 import de.moldiy.molnet.exchange.TrafficID;
 import de.moldiy.molnet.server.Server;
-import de.moldiy.molnet.server.authenticate.AuthenticateValidatorHandler;
+import de.moldiy.molnet.server.ServerChannelConnection;
+import de.moldiy.molnet.utils.BitVector;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 
@@ -11,52 +14,87 @@ public class ServerClientTest {
 
     private int port;
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         int port = 9745;
 
-        Server s = new Server(port, new AuthenticateValidatorHandler() {
-            @Override
-            public boolean authenticate(String[] args) {
-                if (args.length == 2) {
-                    if (args[0].equals("username")) {
-                        return args[1].equals("pw");
-                    }
-                }
-                return false;
-            }
-
-            public void loginSuccessful(ChannelHandlerContext ctx, String[] args) {
-                System.out.println("login successful!");
-            }
-
-            @Override
-            public void loginUnSuccessful(ChannelHandlerContext ctx) {
-                System.out.println("login Unsuccessful -");
-            }
-        });
 
         class MessageReceiver {
         }
+        Server s = new Server(port) {
+            @Override
+            protected void handleNoAccessRight(ChannelHandlerContext ctx, BitVector rightBits) {
+            }
+            @Override
+            public BitVector getRightBitsFromChannel(ChannelHandlerContext ctx) {
+                return null;
+            }
+
+            @Override
+            protected void handleTrafficIDNotFound(String id) {
+                System.out.println("trafficID not found!");
+            }
+        };
         s.loadMessageExchanger(new MessageReceiver() {
+            //            @Rights(rights = {"admin", "normalo"})
             @TrafficID(id = "cords")
-            public void setCords(ChannelHandlerContext ctx, ByteBuf byteBuf) {
+            public void setCords(ServerChannelConnection connection, ByteBuf byteBuf) {
                 System.out.println("jaas");
             }
         });
-
         s.bind();
 
-        Client c = new Client("localhost", port);
-        c.connectAndAuth("lol", "eins");
-        c.authenticate("username", "pw");
+        MessageHandler clientMessageHandler = new MessageHandler() {
+            @Override
+            public BitVector getRightBitsFromChannel(ChannelHandlerContext ctx) {
+                return null;
+            }
 
-        c.writeAndFlush("cords", c.getChannel().alloc().buffer().writeInt(100));
+            @Override
+            protected void execMethod(RightRestrictedMethodHandle methodHandle, BitVector rightBits, ChannelHandlerContext ctx, ByteBuf byteBuf) {
 
-        c.authenticate("username", "pw");
+            }
 
-        Thread.sleep(1000);
+            @Override
+            protected void handleTrafficIDNotFound(String id) {
 
-        c.getChannel().close();
+            }
+        };
+
+        for (int i = 0; i < 1000; i++) {
+            new Thread(() -> {
+                Client c = new Client("localhost", port) {
+
+                    @Override
+                    protected void handleNoAccessRight(ChannelHandlerContext ctx, BitVector rightBits) {
+                    }
+                    @Override
+                    public BitVector getRightBitsFromChannel(ChannelHandlerContext ctx) {
+                        return null;
+                    }
+
+                    @Override
+                    protected void handleTrafficIDNotFound(String id) {
+
+                    }
+                };
+                try {
+                    c.connect();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                c.writeAndFlush("cords", c.getChannel().alloc().buffer().writeInt(100));
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                c.getChannel().close();
+            }).start();
+        }
+        System.gc();
 
 //		new SpaceClient("localhost", port);
 

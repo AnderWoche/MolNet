@@ -67,7 +67,6 @@ public class IDFactory<T> {
 //			Gdx.app.debug("[IDFactory]", "Id created = " + ID);
         }
 
-
         this.ids.put(c, ID);
         this.valueFromID.put(ID, c);
 

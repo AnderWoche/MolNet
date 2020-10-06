@@ -2,12 +2,14 @@ package de.moldiy.molnet.server;
 
 import io.netty.channel.ChannelHandlerContext;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 public abstract class ConnectionIdentifier<T> {
 
-    protected HashMap<ChannelHandlerContext, T> valueIdentifier = new HashMap<>();
-    protected HashMap<T, ChannelHandlerContext> identifierValue = new HashMap<>();
+    protected final Map<ChannelHandlerContext, T> valueIdentifier = Collections.synchronizedMap(new HashMap<>());
+    protected final Map<T, ChannelHandlerContext> identifierValue = Collections.synchronizedMap(new HashMap<>());
 
     public ConnectionIdentifier() {
 
@@ -36,11 +38,11 @@ public abstract class ConnectionIdentifier<T> {
         return this.valueIdentifier.get(ctx);
     }
 
-    public HashMap<ChannelHandlerContext, T> getValueIdentifier() {
+    public Map<ChannelHandlerContext, T> getValueIdentifier() {
         return valueIdentifier;
     }
 
-    public HashMap<T, ChannelHandlerContext> getIdentifierValue() {
+    public Map<T, ChannelHandlerContext> getIdentifierValue() {
         return identifierValue;
     }
 }
