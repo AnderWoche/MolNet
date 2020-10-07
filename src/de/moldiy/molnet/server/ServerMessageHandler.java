@@ -1,7 +1,5 @@
 package de.moldiy.molnet.server;
 
-import de.moldiy.molnet.client.ClientChannelConnection;
-import de.moldiy.molnet.exchange.MessageExchangerManager;
 import de.moldiy.molnet.exchange.MessageHandler;
 import de.moldiy.molnet.exchange.RightRestrictedMethodHandle;
 import de.moldiy.molnet.utils.BitVector;

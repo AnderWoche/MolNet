@@ -12,7 +12,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
-public abstract class Server extends ServerMessageHandler {
+public abstract class Server extends ServerMessageHandler implements MessageWriter {
 
     private final Server that = this;
 
@@ -54,21 +54,9 @@ public abstract class Server extends ServerMessageHandler {
         }
     }
 
+    @Override
     public void broadCastMassage(String trafficID, ByteBuf byteBuf) {
         this.getAllClients().writeAndFlush(NettyByteBufUtil.addStringBeforeMassage(trafficID, byteBuf));
-    }
-
-    public void write(ChannelHandlerContext ctx, String trafficID, ByteBuf byteBuf) {
-        ctx.channel().write(NettyByteBufUtil.addStringBeforeMassage(trafficID, byteBuf));
-    }
-
-    public void writeAndFlush(ChannelHandlerContext ctx, String trafficID, ByteBuf byteBuf) {
-        this.write(ctx, trafficID, byteBuf);
-        ctx.flush();
-    }
-
-    public void flush(ChannelHandlerContext ctx) {
-        ctx.channel().flush();
     }
 
     public ChannelGroup getAllClients() {

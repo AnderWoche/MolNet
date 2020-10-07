@@ -9,6 +9,7 @@ import java.util.UUID;
 
 public class ConnectionIdentifierManagerTest {
 
+    @SuppressWarnings("unchecked")
     @Test
     public void connectionIdentifierManagerTest() {
         ConnectionIdentifierManager cim = new ConnectionIdentifierManager();

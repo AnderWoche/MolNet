@@ -2,7 +2,7 @@ package de.moldiy.molnet.client;
 
 import de.moldiy.molnet.MassageReader;
 import de.moldiy.molnet.MassageWriter;
-import de.moldiy.molnet.NettyByteBufUtil;
+import de.moldiy.molnet.MessageWriter;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -15,7 +15,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 /**
  * @author David Humann (Moldiy)
  */
-public abstract class Client extends ClientMessageHandler {
+public abstract class Client extends ClientMessageHandler implements MessageWriter {
 
     private final Client that = this;
 
@@ -50,17 +50,9 @@ public abstract class Client extends ClientMessageHandler {
         this.c = this.bootstrap.connect(this.host, this.port).sync().channel();
     }
 
-    public void write(String trafficID, ByteBuf byteBuf) {
-        c.write(NettyByteBufUtil.addStringBeforeMassage(trafficID, byteBuf));
-    }
-
-    public void writeAndFlush(String trafficID, ByteBuf byteBuf) {
-        this.write(trafficID, byteBuf);
-        c.flush();
-    }
-
-    public void flush() {
-        c.flush();
+    @Override
+    public void broadCastMassage(String trafficID, ByteBuf byteBuf) {
+        this.writeAndFlush(c, trafficID, byteBuf);
     }
 
     public Channel getChannel() {

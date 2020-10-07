@@ -22,11 +22,6 @@ repositories {
 dependencies {
     // https://mvnrepository.com/artifact/io.netty/netty-all
     api group: 'io.netty', name: 'netty-all', version: '4.1.51.Final'
+    implementation 'junit:junit:4.12'
 
-    api 'com.google.code.gson:gson:2.8.6'
-
-    api 'com.github.Fylipp:easy-events:v1.1.0'
-
-    // https://mvnrepository.com/artifact/com.badlogicgames.gdx/gdx-tools
-    //api group: 'com.badlogicgames.gdx', name: 'gdx-tools', version: '1.9.11'
 }

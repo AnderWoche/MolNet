@@ -5,7 +5,6 @@ import io.netty.channel.*;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.EventExecutor;
-
 import java.net.SocketAddress;
 
 public class CTXTestImpl implements ChannelHandlerContext {

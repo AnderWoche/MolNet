@@ -14,8 +14,6 @@ public abstract class ClientMessageHandler extends MessageHandler {
     @Override
     protected void execMethod(RightRestrictedMethodHandle methodHandle, BitVector rightBits, ChannelHandlerContext ctx, ByteBuf byteBuf) {
 
-        ClientChannelConnection clientChannelConnection = new ClientChannelConnection(ctx, this.client);
-
         try {
             methodHandle.invoke(rightBits, clientChannelConnection, byteBuf);
         } catch(RightRestrictedMethodHandle.NoAccessRightsException e) {
