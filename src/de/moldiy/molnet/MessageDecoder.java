@@ -7,7 +7,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.ReplayingDecoder;
 
-public class MassageReader extends ReplayingDecoder<ByteBuf> {
+public class MessageDecoder extends ReplayingDecoder<ByteBuf> {
 
     private final static int MAX_MASSSAGE_SIZE = 500_000; // this is 500KB
 

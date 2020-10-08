@@ -1,85 +1,85 @@
 package de.moldiy.molnet;
 
-import de.moldiy.molnet.client.Client;
 import de.moldiy.molnet.exchange.Rights;
 import de.moldiy.molnet.exchange.TrafficID;
-import de.moldiy.molnet.server.Server;
 import de.moldiy.molnet.utils.BitVector;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ServerClientTest {
 
     private int port;
 
+    private static long time;
+
+    private static int createClients = 1;
+
     public static void main(String[] args) {
-        int port = 9745;
+        int port = 6555;
+
+        System.out.println("STRAT SERVER CLIENT TEST");
 
         class MessageReceiver {
         }
-        Server s = new Server(port) {
-            @Override
-            protected void handleNoAccessRight(ChannelHandlerContext ctx, BitVector rightBits) {
-                System.out.println("KEIN RECHTE!!!!!");
-            }
-
-            @Override
-            public BitVector getRightBitsFromChannel(ChannelHandlerContext ctx) {
-                return null;
-            }
-
-            @Override
-            protected void handleTrafficIDNotFound(String id) {
-                System.out.println("trafficID not found!");
-            }
-        };
+        Server s = new Server(port, new ServerMessageHandler());
         s.loadMessageExchanger(new MessageReceiver() {
+            AtomicInteger i = new AtomicInteger();
+
             @Rights(rights = {"admin", "normalo"})
             @TrafficID(id = "cords")
-            public void setCords(MessageWriter writer, ByteBuf byteBuf) {
+            public void setCords(NetworkInterface writer, ChannelHandlerContext ctx, ByteBuf byteBuf) {
                 System.out.println("jaas");
+//                if(i % 10 == 0) {
+                System.out.println(i.incrementAndGet() + " TIME: " + ((System.currentTimeMillis() - time) / 1000F) + " sec.");
+                System.out.println("[Server] Clients size: " + s.getAllClients().size());
+//                }
+//                if(i == createClients) {
+//                    System.out.println(PooledByteBufAllocator.DEFAULT.dumpStats());
+//                }
+            }
+
+            @TrafficID(id = "getRights")
+            public void setRights(NetworkInterface networkInterface, ChannelHandlerContext ctx, ByteBuf byteBuf) {
+                BitVector bitVector = networkInterface.getRightIDFactory()
+                        .addRightBits(new BitVector(), "admin", "normalo");
+                networkInterface.getChannelIdentifierManager().setIdentifier(ctx.channel(), "rights", bitVector);
+                System.out.println("rechte gegeben");
             }
         });
-        s.bind();
+        s.bind().addListener((channelFuture) -> {
+            if (channelFuture.isSuccess()) {
+                System.out.println("[SEVRER] Sever ist Oben!");
+            } else {
+                System.out.println("Server cant start: " + channelFuture.cause());
+            }
+        });
 
-        for (int i = 0; i < 300; i++) {
+        time = System.currentTimeMillis();
+        for (int i = 0; i < createClients; i++) {
             new Thread(() -> {
-                Client c = new Client("localhost", port) {
-
-                    @Override
-                    protected void handleNoAccessRight(ChannelHandlerContext ctx, BitVector rightBits) {
-                    }
-
-                    @Override
-                    public BitVector getRightBitsFromChannel(ChannelHandlerContext ctx) {
-                        return null;
-                    }
-
-                    @Override
-                    protected void handleTrafficIDNotFound(String id) {
-
-                    }
-                };
-                try {
-                    c.connect();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                c.writeAndFlush("cords", c.getChannel().alloc().buffer().writeInt(100));
-
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                c.getChannel().close();
+                Client c = new Client("127.0.0.1", port, new EmptyMessageHandler());
+                connectToServer(c);
             }).start();
         }
-        System.gc();
+    }
 
-//		new SpaceClient("localhost", port);
-
+    public static void connectToServer(Client c) {
+        ChannelFuture channelFuture = c.connect();
+        channelFuture.addListener((channelF) -> {
+            if (channelF.isSuccess()) {
+                c.writeAndFlush(c.getChannel(), "cords", PooledByteBufAllocator.DEFAULT.buffer().writeInt(100));
+                c.writeAndFlush(c.getChannel(), "getRights", PooledByteBufAllocator.DEFAULT.buffer().writeInt(100));
+                c.writeAndFlush(c.getChannel(), "cords", PooledByteBufAllocator.DEFAULT.buffer().writeInt(100));
+                c.getChannel().close();
+            } else {
+//                System.out.println("[Client] cant connect to server! cause: " + channelF.cause());
+                Thread.sleep(1000);
+                connectToServer(c);
+            }
+        });
     }
 }

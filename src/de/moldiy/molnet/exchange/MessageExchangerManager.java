@@ -37,11 +37,11 @@ public class MessageExchangerManager {
 
         Rights allMethodRights = object.getClass().getAnnotation(Rights.class);
         if (allMethodRights != null) {
-            this.rightIDFactory.setRightBitsFromStringRights(rightBits, allMethodRights.rights());
+            this.rightIDFactory.addRightBits(rightBits, allMethodRights.rights());
         }
         Rights methodRights = method.getAnnotation(Rights.class);
         if (methodRights != null) {
-            this.rightIDFactory.setRightBitsFromStringRights(rightBits, methodRights.rights());
+            this.rightIDFactory.addRightBits(rightBits, methodRights.rights());
         }
 
         return rightBits;

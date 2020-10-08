@@ -11,9 +11,20 @@ public class RightIDFactory extends IDFactory<String> {
         super(identity);
     }
 
-    public BitVector setRightBitsFromStringRights(BitVector bitVector, String... rights) {
+    public BitVector addRightBits(BitVector bitVector, String... rights) {
         for(int i = rights.length - 1; i >= 0; i--) {
-            bitVector.set(super.getOrCreateID(rights[i]));
+            String stringRight = rights[i].toLowerCase();
+            int id = super.getOrCreateID(stringRight);
+            bitVector.set(id);
+        }
+        return bitVector;
+    }
+
+    public BitVector removeRightsBits(BitVector bitVector, String... rights) {
+        for(int i = rights.length - 1; i >= 0; i--) {
+            String stringRight = rights[i].toLowerCase();
+            int id = super.getOrCreateID(stringRight);
+            bitVector.clear(id);
         }
         return bitVector;
     }

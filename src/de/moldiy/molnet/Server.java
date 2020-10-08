@@ -1,7 +1,6 @@
-package de.moldiy.molnet.server;
+package de.moldiy.molnet;
 
 
-import de.moldiy.molnet.*;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
@@ -12,9 +11,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
-public abstract class Server extends ServerMessageHandler implements MessageWriter {
-
-    private final Server that = this;
+public class Server extends NetworkInterface {
 
     private final ServerBootstrap serverBootstrap;
 
@@ -22,23 +19,35 @@ public abstract class Server extends ServerMessageHandler implements MessageWrit
 
     private final ChannelGroup allClients = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
-    public Server(int port) {
+    private final MessageHandler messageHandler;
+
+    public Server(int port, MessageHandler messageHandler) {
         this.port = port;
-        super.setServer(this);
+        this.messageHandler = messageHandler;
+
+        messageHandler.setNetworkInterface(this);
+
         this.serverBootstrap = new ServerBootstrap();
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         this.serverBootstrap.group(bossGroup, workerGroup);
         this.serverBootstrap.channel(NioServerSocketChannel.class);
+        this.serverBootstrap.option(ChannelOption.SO_BACKLOG, 1024);
         this.serverBootstrap.childHandler(new ChannelInitializer<NioSocketChannel>() {
             @Override
             protected void initChannel(NioSocketChannel ch) {
-                ch.pipeline().addFirst("decoder", new MassageReader());
-                ch.pipeline().addFirst("encoder", new MassageWriter());
+                ch.pipeline().addFirst("decoder", new MessageDecoder());
+                ch.pipeline().addFirst("encoder", new MessageEncoder());
 
-                ch.pipeline().addLast("handler", that);
+                ch.pipeline().addLast("handler", messageHandler);
 
                 allClients.add(ch);
+            }
+
+            @Override
+            public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+                allClients.remove(ctx.channel());
+                super.channelInactive(ctx);
             }
         });
         this.serverBootstrap.option(ChannelOption.SO_BACKLOG, 128);
@@ -46,12 +55,8 @@ public abstract class Server extends ServerMessageHandler implements MessageWrit
 
     }
 
-    public void bind() {
-        try {
-            this.serverBootstrap.bind(port).sync();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    public ChannelFuture bind() {
+        return this.serverBootstrap.bind(port);
     }
 
     @Override
@@ -61,6 +66,10 @@ public abstract class Server extends ServerMessageHandler implements MessageWrit
 
     public ChannelGroup getAllClients() {
         return this.allClients;
+    }
+
+    public void loadMessageExchanger(Object object) {
+        this.messageHandler.loadMessageExchanger(object);
     }
 
 }
