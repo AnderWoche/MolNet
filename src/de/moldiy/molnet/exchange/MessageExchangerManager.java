@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MessageExchangerManager {
+public abstract class MessageExchangerManager {
 
     private final Map<String, RightRestrictedMethodHandle> idMethods = Collections.synchronizedMap(new HashMap<>());
 
@@ -27,10 +27,12 @@ public class MessageExchangerManager {
             if ((trafficID = m.getAnnotation(TrafficID.class)) != null) {
                 String id = trafficID.id();
 
-                this.idMethods.put(id, new RightRestrictedMethodHandle(object, m, this.getRightsFromMethod(object, m)));
+                this.idMethods.put(id, createRightRestrictedMethodHandle(object, m, this.getRightsFromMethod(object, m)));
             }
         }
     }
+
+    protected abstract RightRestrictedMethodHandle createRightRestrictedMethodHandle(Object o, Method m, BitVector bitVector);
 
     private BitVector getRightsFromMethod(Object object, Method method) {
         BitVector rightBits = new BitVector();

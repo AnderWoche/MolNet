@@ -8,6 +8,8 @@ import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ServerClientTest {
@@ -74,6 +76,11 @@ public class ServerClientTest {
                 c.writeAndFlush(c.getChannel(), "cords", PooledByteBufAllocator.DEFAULT.buffer().writeInt(100));
                 c.writeAndFlush(c.getChannel(), "getRights", PooledByteBufAllocator.DEFAULT.buffer().writeInt(100));
                 c.writeAndFlush(c.getChannel(), "cords", PooledByteBufAllocator.DEFAULT.buffer().writeInt(100));
+                try {
+                    c.writeFile(c.getChannel(), "C:\\Users\\david\\Desktop\\test1.jar", new File("C:\\Users\\david\\Desktop\\jd-gui-1.6.6.jar"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 c.getChannel().close();
             } else {
 //                System.out.println("[Client] cant connect to server! cause: " + channelF.cause());
