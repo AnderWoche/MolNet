@@ -10,7 +10,7 @@ public abstract class RightBitsOnlyMessageHandler extends MessageHandler {
     }
 
     @Override
-    protected void handleNoAccessRight(String trafficID, ChannelHandlerContext ctx, BitVector rightBits) {
+    protected void handleNoAccessRight(String trafficID, ChannelHandlerContext ctx) {
 
     }
 }

@@ -16,8 +16,7 @@ public class ServerMessageHandler extends MessageHandler {
     }
 
     @Override
-    protected void handleNoAccessRight(String trafficID, ChannelHandlerContext ctx, BitVector rightBits) {
-        System.out.println("[Server] no Access To the <"+ trafficID +"> trafficID. Ctx: " + ctx.channel().id() +
-                " with the rights: " + rightBits);
+    protected void handleNoAccessRight(String trafficID, ChannelHandlerContext ctx) {
+        System.out.println("[Server] no Access To the <"+ trafficID +"> trafficID. Ctx: " + ctx.channel().id());
     }
 }

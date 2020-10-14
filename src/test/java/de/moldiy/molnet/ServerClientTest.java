@@ -1,7 +1,10 @@
 package de.moldiy.molnet;
 
 import de.moldiy.molnet.exchange.Rights;
+import de.moldiy.molnet.exchange.RunOnChannelConnect;
 import de.moldiy.molnet.exchange.TrafficID;
+import de.moldiy.molnet.exchange.massageexchanger.FileMassageExchanger;
+import de.moldiy.molnet.exchange.massageexchanger.FileMassageExchangerListener;
 import de.moldiy.molnet.utils.BitVector;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -29,7 +32,7 @@ public class ServerClientTest {
         }
         Server s = new Server(port, new ServerMessageHandler());
         s.loadMessageExchanger(new MessageReceiver() {
-            AtomicInteger i = new AtomicInteger();
+            final AtomicInteger i = new AtomicInteger();
 
             @Rights(rights = {"admin", "normalo"})
             @TrafficID(id = "cords")
@@ -51,6 +54,15 @@ public class ServerClientTest {
                 networkInterface.getChannelIdentifierManager().setIdentifier(ctx.channel(), "rights", bitVector);
                 System.out.println("rechte gegeben");
             }
+
+            @RunOnChannelConnect
+            public void sendFile(NetworkInterface networkInterface, ChannelHandlerContext ctx, ByteBuf byteBuf) {
+                try {
+                    networkInterface.writeFile(ctx.channel(), "C:\\Users\\david\\Desktop\\test1.jar", new File("C:\\Users\\david\\Desktop\\jd-gui-1.6.6.jar"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         });
         s.bind().addListener((channelFuture) -> {
             if (channelFuture.isSuccess()) {
@@ -64,6 +76,17 @@ public class ServerClientTest {
         for (int i = 0; i < createClients; i++) {
             new Thread(() -> {
                 Client c = new Client("127.0.0.1", port, new EmptyMessageHandler());
+                c.getMessageExchanger(FileMassageExchanger.class).addListener(new FileMassageExchangerListener() {
+                    @Override
+                    public void createNewFile(String path, long totalFileSize) {
+
+                    }
+
+                    @Override
+                    public void receiveFile(long currentFileSize, long totalFileSize) {
+//                        System.out.println(currentFileSize + "/" + totalFileSize);
+                    }
+                });
                 connectToServer(c);
             }).start();
         }
@@ -76,12 +99,7 @@ public class ServerClientTest {
                 c.writeAndFlush(c.getChannel(), "cords", PooledByteBufAllocator.DEFAULT.buffer().writeInt(100));
                 c.writeAndFlush(c.getChannel(), "getRights", PooledByteBufAllocator.DEFAULT.buffer().writeInt(100));
                 c.writeAndFlush(c.getChannel(), "cords", PooledByteBufAllocator.DEFAULT.buffer().writeInt(100));
-                try {
-                    c.writeFile(c.getChannel(), "C:\\Users\\david\\Desktop\\test1.jar", new File("C:\\Users\\david\\Desktop\\jd-gui-1.6.6.jar"));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                c.getChannel().close();
+//                c.getChannel().close();
             } else {
 //                System.out.println("[Client] cant connect to server! cause: " + channelF.cause());
                 Thread.sleep(1000);

@@ -11,6 +11,9 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
+import java.io.File;
+import java.io.IOException;
+
 public class Server extends NetworkInterface {
 
     private final ServerBootstrap serverBootstrap;
@@ -19,11 +22,9 @@ public class Server extends NetworkInterface {
 
     private final ChannelGroup allClients = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
-    private final MessageHandler messageHandler;
-
     public Server(int port, MessageHandler messageHandler) {
+        super(messageHandler);
         this.port = port;
-        this.messageHandler = messageHandler;
 
         messageHandler.setNetworkInterface(this);
 
@@ -64,12 +65,15 @@ public class Server extends NetworkInterface {
         this.getAllClients().writeAndFlush(NettyByteBufUtil.addStringBeforeMassage(trafficID, byteBuf));
     }
 
-    public ChannelGroup getAllClients() {
-        return this.allClients;
+    @Override
+    public void broadcastFile(String path, File file) throws IOException {
+        for(Channel channel : this.getAllClients()) {
+            super.writeFile(channel, path, file);
+        }
     }
 
-    public void loadMessageExchanger(Object object) {
-        this.messageHandler.loadMessageExchanger(object);
+    public ChannelGroup getAllClients() {
+        return this.allClients;
     }
 
 }

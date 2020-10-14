@@ -9,12 +9,20 @@ public interface MessageWriter {
     void broadCastMassage(String trafficID, ByteBuf byteBuf);
 
     default void write(Channel channel, String trafficID, ByteBuf message) {
-        channel.writeAndFlush(NettyByteBufUtil.addStringBeforeMassage(trafficID, message));
+        channel.write(NettyByteBufUtil.addStringBeforeMassage(trafficID, message));
+    }
+
+    default void write(Channel channel, String trafficID) {
+        channel.write(NettyByteBufUtil.addStringBeforeMassage(trafficID, channel.alloc().buffer()));
     }
 
     default void writeAndFlush(Channel channel, String trafficID, ByteBuf message) {
         this.write(channel, trafficID, message);
         channel.flush();
+    }
+
+    default void writeAndFlush(Channel channel, String trafficID) {
+        this.writeAndFlush(channel, trafficID, channel.alloc().buffer());
     }
 
     default void flush(Channel channel) {

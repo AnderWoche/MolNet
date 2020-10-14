@@ -1,11 +1,15 @@
 package de.moldiy.molnet;
 
+import de.moldiy.molnet.exchange.massageexchanger.FileMassageExchanger;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * @author David Humann (Moldiy)
@@ -17,16 +21,15 @@ public class Client extends NetworkInterface {
 
     private final Bootstrap bootstrap;
 
-    private final MessageHandler messageHandler;
-
     private Channel c;
 
     public Client(String host, int port, MessageHandler messageHandler) {
+        super(messageHandler);
         this.host = host;
         this.port = port;
-        this.messageHandler = messageHandler;
 
         messageHandler.setNetworkInterface(this);
+        messageHandler.loadMessageExchanger(new FileMassageExchanger());
 
         this.bootstrap = new Bootstrap();
         this.bootstrap.group(new NioEventLoopGroup());
@@ -54,11 +57,12 @@ public class Client extends NetworkInterface {
         this.writeAndFlush(c, trafficID, byteBuf);
     }
 
-    public Channel getChannel() {
-        return c;
+    @Override
+    public void broadcastFile(String path, File file) throws IOException {
+        this.writeFile(this.c, path, file);
     }
 
-    public void loadMessageExchanger(Object object) {
-        this.messageHandler.loadMessageExchanger(object);
+    public Channel getChannel() {
+        return c;
     }
 }
