@@ -1,6 +1,6 @@
 package de.moldiy.molnet;
 
-import de.moldiy.molnet.exchange.massageexchanger.FileMassageExchanger;
+import de.moldiy.molnet.exchange.massageexchanger.FileMessageExchanger;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
@@ -29,7 +29,7 @@ public class Client extends NetworkInterface {
         this.port = port;
 
         messageHandler.setNetworkInterface(this);
-        messageHandler.loadMessageExchanger(new FileMassageExchanger());
+        messageHandler.loadMessageExchanger(new FileMessageExchanger());
 
         this.bootstrap = new Bootstrap();
         this.bootstrap.group(new NioEventLoopGroup());

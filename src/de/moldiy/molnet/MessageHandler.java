@@ -81,7 +81,7 @@ public abstract class MessageHandler extends SimpleChannelInboundHandler<ByteBuf
     }
 
     public void loadMessageExchanger(Object object) {
-        this.messageExchangerManager.loadMassageExchanger(object);
+        this.messageExchangerManager.loadMessageExchanger(object);
     }
 
 }

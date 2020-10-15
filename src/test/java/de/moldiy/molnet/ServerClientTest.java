@@ -3,8 +3,8 @@ package de.moldiy.molnet;
 import de.moldiy.molnet.exchange.Rights;
 import de.moldiy.molnet.exchange.RunOnChannelConnect;
 import de.moldiy.molnet.exchange.TrafficID;
-import de.moldiy.molnet.exchange.massageexchanger.FileMassageExchanger;
-import de.moldiy.molnet.exchange.massageexchanger.FileMassageExchangerListener;
+import de.moldiy.molnet.exchange.massageexchanger.FileMessageExchanger;
+import de.moldiy.molnet.exchange.massageexchanger.FileMessageExchangerListener;
 import de.moldiy.molnet.utils.BitVector;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -76,7 +76,7 @@ public class ServerClientTest {
         for (int i = 0; i < createClients; i++) {
             new Thread(() -> {
                 Client c = new Client("127.0.0.1", port, new EmptyMessageHandler());
-                c.getMessageExchanger(FileMassageExchanger.class).addListener(new FileMassageExchangerListener() {
+                c.getMessageExchanger(FileMessageExchanger.class).addListener(new FileMessageExchangerListener() {
                     @Override
                     public void createNewFile(String path, long totalFileSize) {
 

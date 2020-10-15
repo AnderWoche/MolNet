@@ -12,9 +12,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FileMassageExchanger {
+public class FileMessageExchanger {
 
-    private final List<FileMassageExchangerListener> listeners = new ArrayList<>();
+    private final List<FileMessageExchangerListener> listeners = new ArrayList<>();
 
     private long totalFileSize = 0;
     private long currentFileSize = 0;
@@ -29,6 +29,7 @@ public class FileMassageExchanger {
 
         String path = NettyByteBufUtil.readUTF16String(byteBuf);
         this.totalFileSize = byteBuf.readLong();
+        this.currentFileSize = 0;
         try {
             this.fileOutputStream = new FileOutputStream(path);
         } catch (FileNotFoundException e) {
@@ -57,11 +58,11 @@ public class FileMassageExchanger {
         }
     }
 
-    public void addListener(FileMassageExchangerListener fileMassageExchangerListener) {
+    public void addListener(FileMessageExchangerListener fileMassageExchangerListener) {
         this.listeners.add(fileMassageExchangerListener);
     }
 
-    public void removeListener(FileMassageExchangerListener fileMassageExchangerListener) {
+    public void removeListener(FileMessageExchangerListener fileMassageExchangerListener) {
         this.listeners.remove(fileMassageExchangerListener);
     }
 

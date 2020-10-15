@@ -22,7 +22,7 @@ public abstract class MessageExchangerManager {
         this.rightIDFactory = rightIDFactory;
     }
 
-    public synchronized void loadMassageExchanger(Object object) {
+    public synchronized void loadMessageExchanger(Object object) {
         assert object != null;
 
         this.massageExchangerMap.put(object.getClass(), object);
