@@ -58,7 +58,7 @@ public class ServerClientTest {
             @RunOnChannelConnect
             public void sendFile(NetworkInterface networkInterface, ChannelHandlerContext ctx, ByteBuf byteBuf) {
                 try {
-                    networkInterface.writeFile(ctx.channel(), "C:\\Users\\david\\Desktop\\test1.jar", new File("C:\\Users\\david\\Desktop\\jd-gui-1.6.6.jar"));
+                    networkInterface.writeFile(ctx.channel(), "C:\\Users\\david\\Desktop\\test1.mkv", new File("C:\\Users\\david\\Videos\\ping.mkv"));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

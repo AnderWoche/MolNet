@@ -50,6 +50,7 @@ public class FileMessageExchanger {
             this.notifyReceiveFileListener(this.currentFileSize, this.totalFileSize);
 
             this.fileOutputStream.write(bytes);
+            this.fileOutputStream.flush();
 
             if ((this.totalFileSize - this.currentFileSize) == 0) {
                 this.fileOutputStream.flush();
