@@ -37,24 +37,28 @@ public class FileMessageExchanger {
         }
 
         this.notifyCreateNewFileListener(path, this.totalFileSize);
+
+        networkInterface.writeAndFlush(ctx.channel(), "molnet.file.request");
     }
 
     @TrafficID(id = "molnet.file.write")
     public void receiveFile(NetworkInterface networkInterface, ChannelHandlerContext ctx, ByteBuf byteBuf) throws IOException {
         if(this.fileOutputStream != null) {
-            byte[] bytes = new byte[byteBuf.readableBytes()];
-            byteBuf.readBytes(bytes);
+            byte[] readBytes = new byte[byteBuf.readableBytes()];
+            byteBuf.readBytes(readBytes);
 
-            this.currentFileSize += bytes.length;
+            this.currentFileSize += readBytes.length;
 
             this.notifyReceiveFileListener(this.currentFileSize, this.totalFileSize);
 
-            this.fileOutputStream.write(bytes);
+            this.fileOutputStream.write(readBytes);
             this.fileOutputStream.flush();
 
             if ((this.totalFileSize - this.currentFileSize) == 0) {
                 this.fileOutputStream.flush();
                 this.fileOutputStream.close();
+            } else {
+                networkInterface.writeAndFlush(ctx.channel(), "molnet.file.request");
             }
         }
     }
