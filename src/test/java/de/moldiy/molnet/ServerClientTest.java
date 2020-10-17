@@ -3,15 +3,14 @@ package de.moldiy.molnet;
 import de.moldiy.molnet.exchange.Rights;
 import de.moldiy.molnet.exchange.RunOnChannelConnect;
 import de.moldiy.molnet.exchange.TrafficID;
-import de.moldiy.molnet.exchange.massageexchanger.FileMessageExchanger;
 import de.moldiy.molnet.exchange.massageexchanger.FileMessageExchangerListener;
+import de.moldiy.molnet.exchange.massageexchanger.FileMessageReceiverExchanger;
 import de.moldiy.molnet.utils.BitVector;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -58,7 +57,7 @@ public class ServerClientTest {
             @RunOnChannelConnect
             public void sendFile(NetworkInterface networkInterface, ChannelHandlerContext ctx, ByteBuf byteBuf) {
                 try {
-                    networkInterface.writeFile(ctx.channel(), "C:\\Users\\david\\Desktop\\test1.mkv", new File("C:\\Users\\david\\Videos\\ping.mkv"));
+                    networkInterface.writeFile(ctx.channel(), "C:\\Users\\david\\Desktop\\test1.mkv", "C:\\Users\\david\\Videos\\ping.mkv");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -76,7 +75,8 @@ public class ServerClientTest {
         for (int i = 0; i < createClients; i++) {
             new Thread(() -> {
                 Client c = new Client("127.0.0.1", port, new EmptyMessageHandler());
-                c.getMessageExchanger(FileMessageExchanger.class).addListener(new FileMessageExchangerListener() {
+                c.getMessageExchanger(FileMessageReceiverExchanger.class).addListener(new FileMessageExchangerListener() {
+                    int i = 0;
                     @Override
                     public void createNewFile(String path, long totalFileSize) {
 
@@ -84,7 +84,11 @@ public class ServerClientTest {
 
                     @Override
                     public void receiveFile(long currentFileSize, long totalFileSize) {
-//                        System.out.println(currentFileSize + "/" + totalFileSize);
+                        i++;
+                        if(i == 2000) {
+                            i = 0;
+                            System.out.println(currentFileSize + "/" + totalFileSize);
+                        }
                     }
                 });
                 connectToServer(c);

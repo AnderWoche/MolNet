@@ -1,14 +1,12 @@
 package de.moldiy.molnet;
 
 import de.moldiy.molnet.exchange.RightIDFactory;
+import de.moldiy.molnet.exchange.massageexchanger.FileMessageSenderExchanger;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
-import io.netty.channel.DefaultFileRegion;
 
-import java.io.*;
-import java.nio.channels.FileChannel;
-
-// listener für file Transaktion
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public abstract class NetworkInterface implements MessageWriter {
 
@@ -54,26 +52,12 @@ public abstract class NetworkInterface implements MessageWriter {
         this.writeAndFlush(channel, trafficID, channel.alloc().buffer());
     }
 
-    public void writeFile(Channel channel, String path, File file) throws FileNotFoundException, SecurityException, IOException {
-        FileInputStream fileInputStream = new FileInputStream(file);
-
-        ByteBuf firstMessageByteBuf = channel.alloc().buffer();
-        NettyByteBufUtil.writeUTF16String(firstMessageByteBuf, "molnet.file.new");
-        NettyByteBufUtil.writeUTF16String(firstMessageByteBuf, path);
-        firstMessageByteBuf.writeLong(file.length());
-        channel.writeAndFlush(firstMessageByteBuf);
-
-        int readSize;
-        byte[] read = new byte[8192]; // 4096 | 8192
-        while ((readSize = fileInputStream.read(read)) > 0) {
-            ByteBuf byteBuf = channel.alloc().buffer();
-            NettyByteBufUtil.writeUTF16String(byteBuf, "molnet.file.write");
-            byteBuf.writeBytes(read, 0, readSize);
-            channel.writeAndFlush(byteBuf);
-        }
+    @Override
+    public void writeFile(Channel channel, String path, String file) throws FileNotFoundException {
+        this.getMessageExchanger(FileMessageSenderExchanger.class).sendFile(channel, path, file);
     }
 
-    public abstract void broadcastFile(String path, File file) throws IOException;
+    public abstract void broadcastFile(String path, String file) throws IOException;
 
     public MessageHandler getMessageHandler() {
         return messageHandler;

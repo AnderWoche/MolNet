@@ -1,6 +1,7 @@
 package de.moldiy.molnet;
 
 
+import de.moldiy.molnet.exchange.massageexchanger.FileMessageSenderExchanger;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
@@ -27,6 +28,8 @@ public class Server extends NetworkInterface {
         this.port = port;
 
         messageHandler.setNetworkInterface(this);
+
+        messageHandler.loadMessageExchanger(new FileMessageSenderExchanger());
 
         this.serverBootstrap = new ServerBootstrap();
         EventLoopGroup bossGroup = new NioEventLoopGroup();
@@ -66,9 +69,9 @@ public class Server extends NetworkInterface {
     }
 
     @Override
-    public void broadcastFile(String path, File file) throws IOException {
+    public void broadcastFile(String path, String file) throws IOException {
         for(Channel channel : this.getAllClients()) {
-            super.writeFile(channel, path, file);
+            super.getMessageExchanger(FileMessageSenderExchanger.class).sendFile(channel, path, file);
         }
     }
 

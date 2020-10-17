@@ -71,6 +71,16 @@ public abstract class MessageHandler extends SimpleChannelInboundHandler<ByteBuf
         }
     }
 
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        // TODO catch channel disconnect
+        if(cause instanceof IOException) {
+            System.out.println("Channel Disconnected");
+            return;
+        }
+        super.exceptionCaught(ctx, cause);
+    }
+
     private void invokeRightRestrictedMethodHandle(RightRestrictedMethodHandle methodHandle, ChannelHandlerContext ctx, ByteBuf byteBuf) throws Throwable {
         BitVector rightBits = this.getRightBitsFromChannel(ctx);
         methodHandle.invoke(rightBits, this.networkInterface, ctx, byteBuf);

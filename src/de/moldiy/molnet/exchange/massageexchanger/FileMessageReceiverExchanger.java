@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FileMessageExchanger {
+public class FileMessageReceiverExchanger {
 
     private final List<FileMessageExchangerListener> listeners = new ArrayList<>();
 
@@ -52,7 +52,6 @@ public class FileMessageExchanger {
             this.notifyReceiveFileListener(this.currentFileSize, this.totalFileSize);
 
             this.fileOutputStream.write(readBytes);
-            this.fileOutputStream.flush();
 
             if ((this.totalFileSize - this.currentFileSize) == 0) {
                 this.fileOutputStream.flush();

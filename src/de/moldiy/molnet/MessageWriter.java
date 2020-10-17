@@ -2,7 +2,8 @@ package de.moldiy.molnet;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
+
+import java.io.FileNotFoundException;
 
 public interface MessageWriter {
 
@@ -24,6 +25,8 @@ public interface MessageWriter {
     default void writeAndFlush(Channel channel, String trafficID) {
         this.writeAndFlush(channel, trafficID, channel.alloc().buffer());
     }
+
+    void writeFile(Channel channel, String path, String file) throws FileNotFoundException;
 
     default void flush(Channel channel) {
         channel.flush();
