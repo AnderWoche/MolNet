@@ -31,6 +31,11 @@ public class ClientTest {
                     System.out.println(currentFileSize + "/" + totalFileSize);
                 }
             }
+
+            @Override
+            public void fileSuccessfullyReceived(String path, long totalFileSize) {
+
+            }
         });
         connectToServer(c);
 

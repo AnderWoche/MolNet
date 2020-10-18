@@ -18,6 +18,7 @@ public class FileMessageReceiverExchanger {
 
     private long totalFileSize = 0;
     private long currentFileSize = 0;
+    private String path;
     private FileOutputStream fileOutputStream = null;
 
     @TrafficID(id = "molnet.file.new")
@@ -27,16 +28,16 @@ public class FileMessageReceiverExchanger {
             this.fileOutputStream.close();
         }
 
-        String path = NettyByteBufUtil.readUTF16String(byteBuf);
+        this.path = NettyByteBufUtil.readUTF16String(byteBuf);
         this.totalFileSize = byteBuf.readLong();
         this.currentFileSize = 0;
         try {
-            this.fileOutputStream = new FileOutputStream(path);
+            this.fileOutputStream = new FileOutputStream(this.path);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
 
-        this.notifyCreateNewFileListener(path, this.totalFileSize);
+        this.notifyCreateNewFileListener(this.path, this.totalFileSize);
 
         networkInterface.writeAndFlush(ctx.channel(), "molnet.file.request");
     }
@@ -49,13 +50,14 @@ public class FileMessageReceiverExchanger {
 
             this.currentFileSize += readBytes.length;
 
-            this.notifyReceiveFileListener(this.currentFileSize, this.totalFileSize);
-
             this.fileOutputStream.write(readBytes);
+
+            this.notifyReceiveFileListener(this.currentFileSize, this.totalFileSize);
 
             if ((this.totalFileSize - this.currentFileSize) == 0) {
                 this.fileOutputStream.flush();
                 this.fileOutputStream.close();
+                this.notifyFileSuccessfullyReceived(this.path, this.totalFileSize);
             } else {
                 networkInterface.writeAndFlush(ctx.channel(), "molnet.file.request");
             }
@@ -79,6 +81,12 @@ public class FileMessageReceiverExchanger {
     public void notifyReceiveFileListener(long currentFileSize, long totalFileSize) {
         for(int i = this.listeners.size() - 1; i >= 0; i--) {
             this.listeners.get(i).receiveFile(currentFileSize, totalFileSize);
+        }
+    }
+
+    public void notifyFileSuccessfullyReceived(String path, long totalFileSize) {
+        for(int i = this.listeners.size() - 1; i >= 0; i--) {
+            this.listeners.get(i).fileSuccessfullyReceived(path, totalFileSize);
         }
     }
 

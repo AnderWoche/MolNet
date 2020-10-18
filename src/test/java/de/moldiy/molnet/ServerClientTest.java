@@ -90,6 +90,11 @@ public class ServerClientTest {
                             System.out.println(currentFileSize + "/" + totalFileSize);
                         }
                     }
+
+                    @Override
+                    public void fileSuccessfullyReceived(String path, long totalFileSize) {
+
+                    }
                 });
                 connectToServer(c);
             }).start();
