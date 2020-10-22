@@ -30,6 +30,7 @@ public class Client extends NetworkInterface {
         this.port = port;
 
         messageHandler.setNetworkInterface(this);
+        messageHandler.getMessageExchangerManager().setClientFilter();
         messageHandler.loadMessageExchanger(new FileMessageReceiverExchanger());
 
         this.bootstrap = new Bootstrap();

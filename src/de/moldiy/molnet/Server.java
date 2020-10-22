@@ -28,7 +28,7 @@ public class Server extends NetworkInterface {
         this.port = port;
 
         messageHandler.setNetworkInterface(this);
-
+        messageHandler.getMessageExchangerManager().setServerFilter();
         messageHandler.loadMessageExchanger(new FileMessageSenderExchanger());
 
         this.serverBootstrap = new ServerBootstrap();

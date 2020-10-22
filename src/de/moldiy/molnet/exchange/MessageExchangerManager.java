@@ -12,6 +12,7 @@ import java.util.Map;
 
 public abstract class MessageExchangerManager {
 
+    private Class<? extends Annotation> filterType;
     private final Map<Class<?>, Object> massageExchangerMap = new IdentityHashMap<>();
     private final MapArray<Class<? extends Annotation>, RightRestrictedMethodHandle> annotationToMethodsMap = new MapArray<>();
     private final BothSideHashMapWithArray<String, RightRestrictedMethodHandle> idMethods = new BothSideHashMapWithArray<>(true);
@@ -30,17 +31,45 @@ public abstract class MessageExchangerManager {
         for (Method m : object.getClass().getDeclaredMethods()) {
             m.setAccessible(true);
 
-            for(Annotation annotation : m.getDeclaredAnnotations()) {
-                RightRestrictedMethodHandle methodHandle = this.createRightRestrictedMethodHandle(object, m, this.getRightsFromMethod(object, m));
-                this.annotationToMethodsMap.put(annotation.annotationType(), methodHandle);
+            if (this.approveFilter(m)) {
+                for (Annotation annotation : m.getDeclaredAnnotations()) {
+                    RightRestrictedMethodHandle methodHandle = this.createRightRestrictedMethodHandle(object, m, this.getRightsFromMethod(object, m));
+                    this.annotationToMethodsMap.put(annotation.annotationType(), methodHandle);
 
-                if(annotation.annotationType() == TrafficID.class) {
-                    String id = ((TrafficID) annotation).id();
-                    this.idMethods.put(id, methodHandle);
+                    Class<? extends Annotation> annotationType = annotation.annotationType();
+
+
+                    if (annotationType == TrafficID.class) {
+                        String id = ((TrafficID) annotation).id();
+                        this.idMethods.put(id, methodHandle);
+                    }
                 }
             }
 
         }
+    }
+
+    public void setClientFilter() {
+        this.filterType = ClientOnly.class;
+    }
+
+    public void setServerFilter() {
+        this.filterType = ServerOnly.class;
+    }
+
+    private boolean approveFilter(Method m) {
+        if (!m.isAnnotationPresent(ClientOnly.class) && !m.isAnnotationPresent(ServerOnly.class)) {
+            return true;
+        }
+        if (m.isAnnotationPresent(ClientOnly.class)) {
+            if (this.filterType == ClientOnly.class) {
+                return true;
+            }
+        }
+        if (m.isAnnotationPresent(ServerOnly.class)) {
+            return this.filterType == ServerOnly.class;
+        }
+        return false;
     }
 
     protected abstract RightRestrictedMethodHandle createRightRestrictedMethodHandle(Object o, Method m, BitVector bitVector);
