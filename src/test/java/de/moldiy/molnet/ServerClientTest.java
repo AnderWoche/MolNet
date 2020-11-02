@@ -53,7 +53,7 @@ public class ServerClientTest {
             }
 
             @RunOnChannelConnect
-            public void sendFile(NetworkInterface networkInterface, ChannelHandlerContext ctx, ByteBuf byteBuf) {
+            private void sendFile(NetworkInterface networkInterface, ChannelHandlerContext ctx, ByteBuf byteBuf) {
                 try {
                     networkInterface.writeFile(ctx.channel(), "C:\\Users\\david\\Desktop\\test1.mkv", "C:\\Users\\david\\Videos\\ping.mkv");
                 } catch (IOException e) {
