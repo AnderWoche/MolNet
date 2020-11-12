@@ -30,7 +30,7 @@ public class FileMessageSenderExchanger {
 
         FileTransfer fileTransfer = transferList.get(0);
 
-        byte[] read = new byte[8192]; // 4096 | 8192
+        byte[] read = new byte[1_048_576]; // 4096 | 8192 | 2^20 = 1.048.576
         int readSize = fileTransfer.read(read);
 
         ByteBuf byteBuf = ctx.alloc().buffer();
