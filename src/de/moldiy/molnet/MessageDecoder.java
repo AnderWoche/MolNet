@@ -9,17 +9,17 @@ import java.util.List;
 
 public class MessageDecoder extends ReplayingDecoder<ByteBuf> {
 
-    public static final int MAX_MESSAGE_SIZE = 500_000;
+//    public static final int MAX_MESSAGE_SIZE = 500_000;
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) {
         int nextMassageSize = in.readInt();
 
-        if (nextMassageSize > MAX_MESSAGE_SIZE) {
-            System.out.println("A Massage is Bigger than " + MAX_MESSAGE_SIZE
-                    + "Bytes. Disconnecting The Channel...");
-            ctx.close();
-        }
+//        if (nextMassageSize > MAX_MESSAGE_SIZE) {
+//            System.out.println("A Massage is Bigger than " + MAX_MESSAGE_SIZE
+//                    + "Bytes. Disconnecting The Channel...");
+//            ctx.close();
+//        }
 
         ByteBuf read = in.readBytes(nextMassageSize);
         out.add(read);
@@ -35,12 +35,12 @@ public class MessageDecoder extends ReplayingDecoder<ByteBuf> {
         super.exceptionCaught(ctx, cause);
     }
 
-    public static class MaximumSizeExceeded extends RuntimeException {
-        private static final long serialVersionUID = -1833615422763957637L;
-
-        public MaximumSizeExceeded(String s) {
-            super(s);
-        }
-    }
+//    public static class MaximumSizeExceeded extends RuntimeException {
+//        private static final long serialVersionUID = -1833615422763957637L;
+//
+//        public MaximumSizeExceeded(String s) {
+//            super(s);
+//        }
+//    }
 
 }
