@@ -12,16 +12,23 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
-import java.io.File;
 import java.io.IOException;
 
 public class Server extends NetworkInterface {
 
     private final ServerBootstrap serverBootstrap;
 
-    private final int port;
+    private int port;
 
     private final ChannelGroup allClients = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+
+    public Server() {
+        this(Integer.MIN_VALUE);
+    }
+
+    public Server(int port) {
+        this(port, new DefaultMessageHandler());
+    }
 
     public Server(int port, MessageHandler messageHandler) {
         super(messageHandler);
@@ -57,6 +64,16 @@ public class Server extends NetworkInterface {
         this.serverBootstrap.option(ChannelOption.SO_BACKLOG, 128);
         this.serverBootstrap.childOption(ChannelOption.SO_KEEPALIVE, true);
 
+    }
+
+    /**
+     * Set the new port and Connect
+     * @param port sets the new Port
+     * @return returns the ChannelFuture
+     */
+    public ChannelFuture bind(int port) {
+        this.port = port;
+        return this.bind();
     }
 
     public ChannelFuture bind() {
