@@ -10,9 +10,9 @@ public class ConnectionIdentifierManagerTest {
     public void connectionIdentifierManagerTest() {
         ChannelIdentifierManager cim = new ChannelIdentifierManager();
 
-        cim.setIdentifier(new CTXTestImpl().channel(),"uuid", UUID.randomUUID().toString());
-        cim.setIdentifier(new CTXTestImpl().channel(), "uuid", UUID.randomUUID().toString());
-        cim.setIdentifier(new CTXTestImpl().channel(), "uuid", UUID.randomUUID().toString());
+        cim.setIdentifier(null ,"uuid", UUID.randomUUID().toString());
+        cim.setIdentifier(null, "uuid", UUID.randomUUID().toString());
+        cim.setIdentifier(null, "uuid", UUID.randomUUID().toString());
 
         System.out.println("Value - Identifier");
         cim.getAllIdentifier().forEach((identifierName, identifier) -> {

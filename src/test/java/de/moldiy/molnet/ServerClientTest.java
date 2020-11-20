@@ -1,15 +1,17 @@
 package de.moldiy.molnet;
 
 import de.moldiy.molnet.exchange.*;
-import de.moldiy.molnet.exchange.massageexchanger.FileMessageExchangerListener;
-import de.moldiy.molnet.exchange.massageexchanger.FileMessageReceiverExchanger;
+import de.moldiy.molnet.exchange.massageexchanger.file.passive.FileExchangerListener;
+import de.moldiy.molnet.exchange.massageexchanger.file.passive.PassiveFileReceiverExchanger;
 import de.moldiy.molnet.utils.BitVector;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ServerClientTest {
@@ -24,6 +26,7 @@ public class ServerClientTest {
         int port = 6555;
 
         System.out.println("STRAT SERVER CLIENT TEST");
+
 
         class MessageReceiver {
         }
@@ -73,7 +76,7 @@ public class ServerClientTest {
         for (int i = 0; i < createClients; i++) {
             new Thread(() -> {
                 Client c = new Client("127.0.0.1", port, new EmptyMessageHandler());
-                c.getMessageExchanger(FileMessageReceiverExchanger.class).addListener(new FileMessageExchangerListener() {
+                c.getMessageExchanger(PassiveFileReceiverExchanger.class).addListener(new FileExchangerListener() {
                     int i = 0;
                     @Override
                     public void createNewFile(String path, long totalFileSize) {

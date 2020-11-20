@@ -1,12 +1,14 @@
 package de.moldiy.molnet;
 
 import de.moldiy.molnet.exchange.RightIDFactory;
-import de.moldiy.molnet.exchange.massageexchanger.FileMessageSenderExchanger;
+import de.moldiy.molnet.exchange.massageexchanger.file.active.ActiveFileProviderExchanger;
+import de.moldiy.molnet.exchange.massageexchanger.file.passive.PassiveFileSenderExchanger;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Path;
 
 public abstract class NetworkInterface implements MessageWriter {
 
@@ -54,7 +56,11 @@ public abstract class NetworkInterface implements MessageWriter {
 
     @Override
     public void writeFile(Channel channel, String path, String file) throws FileNotFoundException {
-        this.getMessageExchanger(FileMessageSenderExchanger.class).sendFile(channel, path, file);
+        this.getMessageExchanger(PassiveFileSenderExchanger.class).sendFile(channel, path, file);
+    }
+
+    public void provideFile(String name, Path path) throws IOException {
+        this.getMessageExchanger(ActiveFileProviderExchanger.class).provide(name, path);
     }
 
     public abstract void broadcastFile(String path, String file) throws IOException;

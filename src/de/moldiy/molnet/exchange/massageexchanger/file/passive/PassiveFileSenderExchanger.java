@@ -1,8 +1,9 @@
-package de.moldiy.molnet.exchange.massageexchanger;
+package de.moldiy.molnet.exchange.massageexchanger.file.passive;
 
 import de.moldiy.molnet.NettyByteBufUtil;
 import de.moldiy.molnet.NetworkInterface;
 import de.moldiy.molnet.exchange.TrafficID;
+import de.moldiy.molnet.exchange.massageexchanger.file.FileExchangerConstants;
 import de.moldiy.molnet.utils.MapArray;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -13,30 +14,32 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
-public class FileMessageSenderExchanger {
+public class PassiveFileSenderExchanger {
 
-    private final MapArray<Channel, FileTransfer> filesToSend = new MapArray<>();
+    private final MapArray<Channel, FilePassiveTransfer> filesToSend = new MapArray<>();
 
     public synchronized void sendFile(Channel channel, String path, String file) throws FileNotFoundException {
-        FileTransfer fileMessage = new FileTransfer(channel, path, new File(file));
+        File f = new File(file);
+        if(!f.isFile()) throw new FileNotFoundException("The path: " + file + " is not a file.");
+        FilePassiveTransfer fileMessage = new FilePassiveTransfer(channel, path, f);
         this.filesToSend.put(channel, fileMessage);
         this.sendNewFile(channel);
     }
 
-    @TrafficID(id = "molnet.file.request")
-    private void sendFile(NetworkInterface networkInterface, ChannelHandlerContext ctx, ByteBuf message) throws IOException {
+    @TrafficID(id = FileExchangerConstants.PASSIVE_FILE_SENDER_REQUEST)
+    private void net_sendFile(NetworkInterface networkInterface, ChannelHandlerContext ctx, ByteBuf message) throws IOException {
 
-        List<FileTransfer> transferList = this.filesToSend.get(ctx.channel());
+        List<FilePassiveTransfer> transferList = this.filesToSend.get(ctx.channel());
 
-        FileTransfer fileTransfer = transferList.get(0);
+        FilePassiveTransfer fileTransfer = transferList.get(0);
 
-        byte[] read = new byte[1_048_576]; // 4096 | 8192 | 2^20 = 1.048.576
+        byte[] read = new byte[FileExchangerConstants.SAVED_FILE_BYTES_IN_RAM];
         int readSize = fileTransfer.read(read);
 
         ByteBuf byteBuf = ctx.alloc().buffer();
         byteBuf.writeBytes(read, 0, readSize);
 
-        networkInterface.writeAndFlush(ctx.channel(), "molnet.file.write", byteBuf);
+        networkInterface.writeAndFlush(ctx.channel(), FileExchangerConstants.PASSIVE_FILE_RECEIVER_WRITE, byteBuf);
 
         if (readSize < read.length) {
             fileTransfer.close();
@@ -46,14 +49,14 @@ public class FileMessageSenderExchanger {
     }
 
     private void sendNewFile(Channel channel) throws FileNotFoundException {
-        List<FileTransfer> transferList = this.filesToSend.get(channel);
+        List<FilePassiveTransfer> transferList = this.filesToSend.get(channel);
         if(!transferList.isEmpty()) {
-            FileTransfer fileTransfer = transferList.get(0);
+            FilePassiveTransfer fileTransfer = transferList.get(0);
             if (fileTransfer != null && !fileTransfer.isOpen()) {
                 fileTransfer.open();
 
                 ByteBuf firstMessageByteBuf = channel.alloc().buffer();
-                NettyByteBufUtil.writeUTF16String(firstMessageByteBuf, "molnet.file.new");
+                NettyByteBufUtil.writeUTF16String(firstMessageByteBuf, FileExchangerConstants.PASSIVE_FILE_RECEIVER_NEW);
                 NettyByteBufUtil.writeUTF16String(firstMessageByteBuf, fileTransfer.getPath());
                 firstMessageByteBuf.writeLong(fileTransfer.getTotalFileSize());
                 channel.writeAndFlush(firstMessageByteBuf);

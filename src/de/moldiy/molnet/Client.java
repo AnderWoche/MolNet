@@ -1,7 +1,7 @@
 package de.moldiy.molnet;
 
-import de.moldiy.molnet.exchange.massageexchanger.FileMessageReceiverExchanger;
-import de.moldiy.molnet.exchange.massageexchanger.FileMessageSenderExchanger;
+import de.moldiy.molnet.exchange.massageexchanger.file.passive.PassiveFileReceiverExchanger;
+import de.moldiy.molnet.exchange.massageexchanger.file.passive.PassiveFileSenderExchanger;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
@@ -9,7 +9,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
-import java.io.File;
 import java.io.IOException;
 
 /**
@@ -31,7 +30,7 @@ public class Client extends NetworkInterface {
 
         messageHandler.setNetworkInterface(this);
         messageHandler.getMessageExchangerManager().setClientFilter();
-        messageHandler.loadMessageExchanger(new FileMessageReceiverExchanger());
+        messageHandler.loadMessageExchanger(new PassiveFileReceiverExchanger());
 
         this.bootstrap = new Bootstrap();
         this.bootstrap.group(new NioEventLoopGroup());
@@ -61,7 +60,7 @@ public class Client extends NetworkInterface {
 
     @Override
     public void broadcastFile(String path, String file) throws IOException {
-        this.getMessageExchanger(FileMessageSenderExchanger.class).sendFile(this.c, path, file);
+        this.getMessageExchanger(PassiveFileSenderExchanger.class).sendFile(this.c, path, file);
     }
 
     public Channel getChannel() {

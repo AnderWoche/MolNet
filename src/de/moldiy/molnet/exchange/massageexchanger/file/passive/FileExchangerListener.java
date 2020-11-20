@@ -1,6 +1,6 @@
-package de.moldiy.molnet.exchange.massageexchanger;
+package de.moldiy.molnet.exchange.massageexchanger.file.passive;
 
-public interface FileMessageExchangerListener {
+public interface FileExchangerListener {
 
     void createNewFile(String path, long totalFileSize);
 

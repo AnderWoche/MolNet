@@ -1,7 +1,7 @@
 package de.moldiy.molnet;
 
-import de.moldiy.molnet.exchange.massageexchanger.FileMessageReceiverExchanger;
-import de.moldiy.molnet.exchange.massageexchanger.FileMessageExchangerListener;
+import de.moldiy.molnet.exchange.massageexchanger.file.passive.PassiveFileReceiverExchanger;
+import de.moldiy.molnet.exchange.massageexchanger.file.passive.FileExchangerListener;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelFuture;
 
@@ -9,7 +9,7 @@ public class ClientTest {
 
     public static void main(String[] args) {
         Client c = new Client("127.0.0.1", 6555, new EmptyMessageHandler());
-        c.getMessageExchanger(FileMessageReceiverExchanger.class).addListener(new FileMessageExchangerListener() {
+        c.getMessageExchanger(PassiveFileReceiverExchanger.class).addListener(new FileExchangerListener() {
             int files = 0;
 
             int i = 0;

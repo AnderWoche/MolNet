@@ -1,4 +1,4 @@
-package de.moldiy.molnet.exchange.massageexchanger;
+package de.moldiy.molnet.exchange.massageexchanger.file.passive;
 
 import io.netty.channel.Channel;
 
@@ -7,7 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-public class FileTransfer {
+public class FilePassiveTransfer {
 
     private final Channel channel;
     private final String path;
@@ -17,7 +17,7 @@ public class FileTransfer {
 
     private FileInputStream fileInputStream;
 
-    public FileTransfer(Channel channel, String path, File file) {
+    public FilePassiveTransfer(Channel channel, String path, File file) {
         this.channel = channel;
         this.path = path;
         this.file = file;
