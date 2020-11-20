@@ -1,5 +1,6 @@
 package de.moldiy.molnet;
 
+import de.moldiy.molnet.exchange.massageexchanger.file.active.ActiveFileReaderExchanger;
 import de.moldiy.molnet.exchange.massageexchanger.file.passive.PassiveFileReceiverExchanger;
 import de.moldiy.molnet.exchange.massageexchanger.file.passive.PassiveFileSenderExchanger;
 import io.netty.bootstrap.Bootstrap;
@@ -42,6 +43,7 @@ public class Client extends NetworkInterface {
         messageHandler.setNetworkInterface(this);
         messageHandler.getMessageExchangerManager().setClientFilter();
         messageHandler.loadMessageExchanger(new PassiveFileReceiverExchanger());
+        messageHandler.loadMessageExchanger(new ActiveFileReaderExchanger());
 
         this.bootstrap = new Bootstrap();
         this.bootstrap.group(new NioEventLoopGroup());

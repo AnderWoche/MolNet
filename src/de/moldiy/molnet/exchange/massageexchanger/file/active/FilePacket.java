@@ -11,7 +11,10 @@ import java.util.List;
 public class FilePacket {
 
     private final List<File> files = new ArrayList<>();
+    private final List<String> relativeFilePath = new ArrayList<>();
+
     private final List<File> unmodifiableFiles = Collections.unmodifiableList(this.files);
+    private final List<String> relativeFilePathReadOnly = Collections.unmodifiableList(this.relativeFilePath);
 
     private long totalTransferSize = 0;
 
@@ -21,11 +24,12 @@ public class FilePacket {
             this.totalTransferSize += file.length();
             this.files.add(path.toFile());
         } else {
-            Files.walk(path).filter(Files::isRegularFile).forEach(eachFilepath -> {
+            Files.walk(path).filter(Files::isRegularFile).forEach(filePath -> {
                 String pathString = path.toString();
-                String eachPathString = eachFilepath.toString();
-                System.out.println(eachPathString.substring(pathString.length()));
-                File file = eachFilepath.toFile();
+                String eachPathString = filePath.toString();
+                this.relativeFilePath.add(eachPathString.substring(pathString.length()));
+
+                File file = filePath.toFile();
                 this.totalTransferSize += file.length();
                 this.files.add(file);
             });
@@ -34,6 +38,10 @@ public class FilePacket {
 
     public List<File> getFiles() {
         return this.unmodifiableFiles;
+    }
+
+    public List<String> getRelativeFilePath() {
+        return this.relativeFilePathReadOnly;
     }
 
     public long getTotalTransferSize() {

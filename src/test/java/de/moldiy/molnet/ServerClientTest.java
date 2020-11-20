@@ -30,7 +30,7 @@ public class ServerClientTest {
 
         class MessageReceiver {
         }
-        Server s = new Server(port, new ServerMessageHandler());
+        Server s = new Server(port);
         s.loadMessageExchanger(new MessageReceiver() {
             final AtomicInteger i = new AtomicInteger();
 
@@ -47,6 +47,7 @@ public class ServerClientTest {
 //                }
             }
 
+            @Threaded
             @TrafficID(id = "getRights")
             public void setRights(NetworkInterface networkInterface, ChannelHandlerContext ctx, ByteBuf byteBuf) {
                 BitVector bitVector = networkInterface.getRightIDFactory()

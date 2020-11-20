@@ -14,8 +14,8 @@ public abstract class MessageExchangerManager {
 
     private Class<? extends Annotation> filterType;
     private final Map<Class<?>, Object> massageExchangerMap = new IdentityHashMap<>();
-    private final MapArray<Class<? extends Annotation>, RightRestrictedMethodHandle> annotationToMethodsMap = new MapArray<>();
-    private final BothSideHashMapWithArray<String, RightRestrictedMethodHandle> idMethods = new BothSideHashMapWithArray<>(true);
+    private final MapArray<Class<? extends Annotation>, MolNetMethodHandle> annotationToMethodsMap = new MapArray<>();
+    private final BothSideHashMapWithArray<String, MolNetMethodHandle> idMethods = new BothSideHashMapWithArray<>(true);
 
     private final RightIDFactory rightIDFactory;
 
@@ -33,7 +33,7 @@ public abstract class MessageExchangerManager {
 
             if (this.approveFilter(m)) {
                 for (Annotation annotation : m.getDeclaredAnnotations()) {
-                    RightRestrictedMethodHandle methodHandle = this.createRightRestrictedMethodHandle(object, m, this.getRightsFromMethod(object, m));
+                    MolNetMethodHandle methodHandle = this.createMolNetMethodHandle(object, m, this.getRightsFromMethod(object, m));
                     this.annotationToMethodsMap.put(annotation.annotationType(), methodHandle);
 
                     Class<? extends Annotation> annotationType = annotation.annotationType();
@@ -72,7 +72,7 @@ public abstract class MessageExchangerManager {
         return false;
     }
 
-    protected abstract RightRestrictedMethodHandle createRightRestrictedMethodHandle(Object o, Method m, BitVector bitVector);
+    protected abstract MolNetMethodHandle createMolNetMethodHandle(Object o, Method m, BitVector bitVector);
 
     private BitVector getRightsFromMethod(Object object, Method method) {
         BitVector rightBits = new BitVector();
@@ -90,8 +90,8 @@ public abstract class MessageExchangerManager {
     }
 
 
-    public RightRestrictedMethodHandle getRightRestrictedMethodHandle(String id) {
-        RightRestrictedMethodHandle methodHandle = this.idMethods.getValue(id);
+    public MolNetMethodHandle getRightRestrictedMethodHandle(String id) {
+        MolNetMethodHandle methodHandle = this.idMethods.getValue(id);
         if (methodHandle == null) {
             throw new TrafficIDNotExists("The TrafficID: " + id + " not exist!");
         }
@@ -104,7 +104,7 @@ public abstract class MessageExchangerManager {
      * @throws Throwable throws if something went wrong
      */
     public void exec(String id, BitVector rightBits, Object... args) throws Throwable {
-        RightRestrictedMethodHandle methodHandle = this.getRightRestrictedMethodHandle(id);
+        MolNetMethodHandle methodHandle = this.getRightRestrictedMethodHandle(id);
         methodHandle.invoke(rightBits, args);
     }
 
@@ -113,15 +113,15 @@ public abstract class MessageExchangerManager {
         return (T) this.massageExchangerMap.get(objectClass);
     }
 
-    public List<RightRestrictedMethodHandle> getMethodsFromAnnotation(Class<? extends Annotation> annotation) {
+    public List<MolNetMethodHandle> getMethodsFromAnnotation(Class<? extends Annotation> annotation) {
         return this.annotationToMethodsMap.get(annotation);
     }
 
-    public MapArray<Class<? extends Annotation>, RightRestrictedMethodHandle> getAnnotationToMethodsMap() {
+    public MapArray<Class<? extends Annotation>, MolNetMethodHandle> getAnnotationToMethodsMap() {
         return annotationToMethodsMap;
     }
 
-    public BothSideHashMapWithArray<String, RightRestrictedMethodHandle> getIdMethods() {
+    public BothSideHashMapWithArray<String, MolNetMethodHandle> getIdMethods() {
         return idMethods;
     }
 

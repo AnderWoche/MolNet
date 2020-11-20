@@ -2,12 +2,13 @@ package de.moldiy.molnet.exchange;
 
 import de.moldiy.molnet.utils.BitVector;
 
+import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.WrongMethodTypeException;
 import java.lang.reflect.Method;
 
-public class RightRestrictedMethodHandle {
+public class MolNetMethodHandle {
 
     private static final MethodHandles.Lookup lookup = MethodHandles.lookup();
 
@@ -17,9 +18,17 @@ public class RightRestrictedMethodHandle {
 
     private final BitVector rightsRequired;
 
-    public RightRestrictedMethodHandle(Object object, Method m, BitVector rightsRequired) {
+    private final Class<? extends Annotation>[] annotationsClasses;
+
+    public MolNetMethodHandle(Object object, Method m, BitVector rightsRequired) {
         this.object = object;
         this.rightsRequired = rightsRequired;
+
+        Annotation[] annotations = m.getAnnotations();
+        this.annotationsClasses = new Class[annotations.length];
+        for(int i = 0; i < annotationsClasses.length; i++) {
+            this.annotationsClasses[i] = annotations[i].annotationType();
+        }
 
         try {
             methodHandle = lookup.unreflect(m);
@@ -43,6 +52,15 @@ public class RightRestrictedMethodHandle {
             throw new NoAccessRightsException("Access denied. The rights not equals rightsRequired.");
         }
         this.methodHandle.invoke(this.object, args);
+    }
+
+    public boolean isAnnotationPresents(Class<? extends Annotation> annotationClass) {
+        for(int i = this.annotationsClasses.length - 1; i >= 0; i--) {
+            if(this.annotationsClasses[i] == annotationClass) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public Object getObject() {

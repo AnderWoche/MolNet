@@ -11,7 +11,7 @@ public class MessageExchangerManagerImpl extends MessageExchangerManager {
     }
 
     @Override
-    protected RightRestrictedMethodHandle createRightRestrictedMethodHandle(Object o, Method m, BitVector bitVector) {
-        return new RightRestrictedMethodHandle(o, m, bitVector);
+    protected MolNetMethodHandle createMolNetMethodHandle(Object o, Method m, BitVector bitVector) {
+        return new MolNetMethodHandle(o, m, bitVector);
     }
 }

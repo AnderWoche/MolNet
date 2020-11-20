@@ -9,6 +9,9 @@ import io.netty.channel.SimpleChannelInboundHandler;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @ChannelHandler.Sharable
 public abstract class MessageHandler extends SimpleChannelInboundHandler<ByteBuf> {
@@ -16,6 +19,8 @@ public abstract class MessageHandler extends SimpleChannelInboundHandler<ByteBuf
     private NetworkInterface networkInterface;
 
     private MessageExchangerManager messageExchangerManager;
+
+    private final ExecutorService executorService = Executors.newCachedThreadPool();
 
     void setNetworkInterface(NetworkInterface networkInterface) {
         this.networkInterface = networkInterface;
@@ -34,13 +39,13 @@ public abstract class MessageHandler extends SimpleChannelInboundHandler<ByteBuf
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        List<RightRestrictedMethodHandle> methodHandles = messageExchangerManager.getMethodsFromAnnotation(RunOnChannelConnect.class);
+        List<MolNetMethodHandle> methodHandles = messageExchangerManager.getMethodsFromAnnotation(RunOnChannelConnect.class);
         if(methodHandles != null) {
             for (int i = methodHandles.size() - 1; i >= 0; i--) {
-                RightRestrictedMethodHandle methodHandle = methodHandles.get(i);
+                MolNetMethodHandle methodHandle = methodHandles.get(i);
                 try {
                     this.invokeRightRestrictedMethodHandle(methodHandle, ctx, null);
-                } catch (RightRestrictedMethodHandle.NoAccessRightsException e) {
+                } catch (MolNetMethodHandle.NoAccessRightsException e) {
                     this.handleNoAccessRight(this.messageExchangerManager.getIdMethods().getKey(methodHandle), ctx);
                 } catch (Throwable throwable) {
                     throwable.printStackTrace();
@@ -54,7 +59,7 @@ public abstract class MessageHandler extends SimpleChannelInboundHandler<ByteBuf
     protected void channelRead0(ChannelHandlerContext ctx, ByteBuf byteBuf) throws IOException {
         String trafficID = NettyByteBufUtil.readUTF16String(byteBuf);
 
-        RightRestrictedMethodHandle methodHandle;
+        MolNetMethodHandle methodHandle;
         try {
             methodHandle = this.messageExchangerManager.getRightRestrictedMethodHandle(trafficID);
         } catch (MessageExchangerManager.TrafficIDNotExists e) {
@@ -64,7 +69,7 @@ public abstract class MessageHandler extends SimpleChannelInboundHandler<ByteBuf
 
         try {
             this.invokeRightRestrictedMethodHandle(methodHandle, ctx, byteBuf);
-        } catch (RightRestrictedMethodHandle.NoAccessRightsException e) {
+        } catch (MolNetMethodHandle.NoAccessRightsException e) {
             this.handleNoAccessRight(trafficID, ctx);
         } catch (Throwable throwable) {
             throwable.printStackTrace();
@@ -81,9 +86,19 @@ public abstract class MessageHandler extends SimpleChannelInboundHandler<ByteBuf
         super.exceptionCaught(ctx, cause);
     }
 
-    private void invokeRightRestrictedMethodHandle(RightRestrictedMethodHandle methodHandle, ChannelHandlerContext ctx, ByteBuf byteBuf) throws Throwable {
+    private void invokeRightRestrictedMethodHandle(MolNetMethodHandle methodHandle, ChannelHandlerContext ctx, ByteBuf byteBuf) throws Throwable {
         BitVector rightBits = this.getRightBitsFromChannel(ctx);
-        methodHandle.invoke(rightBits, this.networkInterface, ctx, byteBuf);
+        if(methodHandle.isAnnotationPresents(Threaded.class)) {
+            this.executorService.execute(() -> {
+                try {
+                    methodHandle.invoke(rightBits, this.networkInterface, ctx, byteBuf);
+                } catch (Throwable throwable) {
+                    throwable.printStackTrace();
+                }
+            });
+        } else {
+            methodHandle.invoke(rightBits, this.networkInterface, ctx, byteBuf);
+        }
     }
 
     public MessageExchangerManager getMessageExchangerManager() {
