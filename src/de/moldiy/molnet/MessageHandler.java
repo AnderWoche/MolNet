@@ -56,7 +56,7 @@ public abstract class MessageHandler extends SimpleChannelInboundHandler<ByteBuf
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, ByteBuf byteBuf) throws IOException {
+    protected void channelRead0(ChannelHandlerContext ctx, ByteBuf byteBuf) {
         String trafficID = NettyByteBufUtil.readUTF16String(byteBuf);
 
         MolNetMethodHandle methodHandle;
@@ -89,9 +89,11 @@ public abstract class MessageHandler extends SimpleChannelInboundHandler<ByteBuf
     private void invokeRightRestrictedMethodHandle(MolNetMethodHandle methodHandle, ChannelHandlerContext ctx, ByteBuf byteBuf) throws Throwable {
         BitVector rightBits = this.getRightBitsFromChannel(ctx);
         if(methodHandle.isAnnotationPresents(Threaded.class)) {
+            ByteBuf copiedByteBuff = byteBuf.copy();
             this.executorService.execute(() -> {
                 try {
-                    methodHandle.invoke(rightBits, this.networkInterface, ctx, byteBuf);
+                    methodHandle.invoke(rightBits, this.networkInterface, ctx, copiedByteBuff);
+                    copiedByteBuff.release();
                 } catch (Throwable throwable) {
                     throwable.printStackTrace();
                 }

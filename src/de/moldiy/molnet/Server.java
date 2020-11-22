@@ -1,7 +1,7 @@
 package de.moldiy.molnet;
 
 
-import de.moldiy.molnet.exchange.massageexchanger.file.active.ActiveFileProviderExchanger;
+import de.moldiy.molnet.exchange.massageexchanger.file.provider.ActiveFileProviderExchanger;
 import de.moldiy.molnet.exchange.massageexchanger.file.passive.PassiveFileSenderExchanger;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;

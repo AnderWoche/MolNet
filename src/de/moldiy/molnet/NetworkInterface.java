@@ -1,8 +1,9 @@
 package de.moldiy.molnet;
 
 import de.moldiy.molnet.exchange.RightIDFactory;
-import de.moldiy.molnet.exchange.massageexchanger.file.active.ActiveFileProviderExchanger;
-import de.moldiy.molnet.exchange.massageexchanger.file.active.ActiveFileReaderExchanger;
+import de.moldiy.molnet.exchange.massageexchanger.file.provider.ActiveFileProviderExchanger;
+import de.moldiy.molnet.exchange.massageexchanger.file.provider.ActiveFileReaderExchanger;
+import de.moldiy.molnet.exchange.massageexchanger.file.provider.FileDownloadProcessor;
 import de.moldiy.molnet.exchange.massageexchanger.file.passive.PassiveFileSenderExchanger;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -64,8 +65,8 @@ public abstract class NetworkInterface implements AdvancedMessageWriter {
         this.getMessageExchanger(ActiveFileProviderExchanger.class).provide(name, path);
     }
 
-    public void requestFile(Channel channel, String name, Path directory) {
-        this.getMessageExchanger(ActiveFileReaderExchanger.class).requestFile(this, channel, name, directory);
+    public FileDownloadProcessor requestFile(Channel channel, String name, Path directory) {
+        return this.getMessageExchanger(ActiveFileReaderExchanger.class).requestFile(this, channel, name, directory);
     }
 
     public abstract void broadcastFile(String path, String file) throws IOException;

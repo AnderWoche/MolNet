@@ -12,10 +12,14 @@ public class FileExchangerConstants {
     public static final String PASSIVE_FILE_SENDER_REQUEST = "molnet.file.passive.request";
 
     // Active
+    //Receive
     public static final String ACTIVE_FILE_PACKET_NEW_FILE = "molnet.file.active.new.file";
     public static final String ACTIVE_FILE_PACKET_NEW_PACKET = "molnet.file.active.new.packet";
-    public static final String ACTIVE_FILE_PACKET_CLOSE = "molnet.file.active.close";
+    public static final String ACTIVE_FILE_PACKET_DONE = "molnet.file.active.done";
     public static final String ACTIVE_FILE_PACKET_WRITE = "molnet.file.active.write";
+    public static final String ACTIVE_FILE_PACKET_DO_NOT_EXISTS = "molnet.file.active.packet.not.exists";
+
+    //Send
     public static final String ACTIVE_FILE_PACKET_PROVIDER_REQUEST = "molnet.file.active.request";
 
 }

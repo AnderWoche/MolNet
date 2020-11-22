@@ -1,4 +1,4 @@
-package de.moldiy.molnet.exchange.massageexchanger.file.active;
+package de.moldiy.molnet.exchange.massageexchanger.file.provider;
 
 import de.moldiy.molnet.NettyByteBufUtil;
 import de.moldiy.molnet.NetworkInterface;
@@ -30,22 +30,25 @@ public class ActiveFileProviderExchanger {
         String name = NettyByteBufUtil.readUTF16String(message);
         FilePacket filePacket = this.providedFiles.get(name);
 
+        if(filePacket == null) {
+            networkInterface.writeAndFlush(ctx.channel(), FileExchangerConstants.ACTIVE_FILE_PACKET_DO_NOT_EXISTS);
+            return;
+        }
 
-        ByteBuf filePacketBuffer = ctx.alloc().buffer();
+        ByteBuf filePacketBuffer = ctx.alloc().buffer();1
         filePacketBuffer.writeInt(filePacket.getFiles().size());
         filePacketBuffer.writeLong(filePacket.getTotalTransferSize());
-        networkInterface.write(ctx.channel(), FileExchangerConstants.ACTIVE_FILE_PACKET_NEW_PACKET);
+        networkInterface.write(ctx.channel(), FileExchangerConstants.ACTIVE_FILE_PACKET_NEW_PACKET, filePacketBuffer);
 
         List<File> filesToSend = filePacket.getFiles();
         List<String> filePathsToSend = filePacket.getRelativeFilePath();
 
-        for(int i = filePathsToSend.size() - 1; i >= 0; i--) {
+        for(int i = filesToSend.size() - 1; i >= 0; i--) {
             File file = filesToSend.get(i);
             String relativePath = filePathsToSend.get(i);
             long fileSize = file.length();
 
             ByteBuf fileMessageByteBuf = ctx.alloc().buffer();
-            NettyByteBufUtil.writeUTF16String(fileMessageByteBuf, file.getName());
             NettyByteBufUtil.writeUTF16String(fileMessageByteBuf, relativePath);
             fileMessageByteBuf.writeLong(fileSize);
             networkInterface.writeAndFlush(ctx.channel(), FileExchangerConstants.ACTIVE_FILE_PACKET_NEW_FILE, fileMessageByteBuf);
@@ -62,9 +65,9 @@ public class ActiveFileProviderExchanger {
                     Thread.yield();
                 }
 
-                networkInterface.writeAndFlush(ctx.channel(), FileExchangerConstants.PASSIVE_FILE_RECEIVER_WRITE, byteBuf);
+                networkInterface.writeAndFlush(ctx.channel(), FileExchangerConstants.ACTIVE_FILE_PACKET_WRITE, byteBuf);
             }
         }
-        networkInterface.writeAndFlush(ctx.channel(), FileExchangerConstants.ACTIVE_FILE_PACKET_CLOSE);
+        networkInterface.writeAndFlush(ctx.channel(), FileExchangerConstants.ACTIVE_FILE_PACKET_DONE);
     }
 }
