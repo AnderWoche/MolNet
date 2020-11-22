@@ -35,7 +35,7 @@ public class ActiveFileProviderExchanger {
             return;
         }
 
-        ByteBuf filePacketBuffer = ctx.alloc().buffer();1
+        ByteBuf filePacketBuffer = ctx.alloc().buffer();
         filePacketBuffer.writeInt(filePacket.getFiles().size());
         filePacketBuffer.writeLong(filePacket.getTotalTransferSize());
         networkInterface.write(ctx.channel(), FileExchangerConstants.ACTIVE_FILE_PACKET_NEW_PACKET, filePacketBuffer);
