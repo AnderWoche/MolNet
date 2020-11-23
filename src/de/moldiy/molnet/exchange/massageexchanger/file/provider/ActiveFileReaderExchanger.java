@@ -110,7 +110,7 @@ public class ActiveFileReaderExchanger {
     }
 
     private File getFileLocation(String path) throws IOException {
-        Path p = Paths.get(this.activeProcessor.getDirectory() + "/" + path);
+        Path p = Paths.get(this.activeProcessor.getDirectory() + path);
 
         Path folders = p.resolveSibling("");
         Files.createDirectories(folders);
