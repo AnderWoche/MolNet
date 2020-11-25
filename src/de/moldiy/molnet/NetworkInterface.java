@@ -69,6 +69,14 @@ public abstract class NetworkInterface implements AdvancedMessageWriter {
         return this.getMessageExchanger(ActiveFileReaderExchanger.class).requestFile(this, channel, name, directory);
     }
 
+    public boolean isServer() {
+        return this instanceof Server;
+    }
+
+    public boolean isClient() {
+        return this instanceof Client;
+    }
+
     public abstract void broadcastFile(String path, String file) throws IOException;
 
     public MessageHandler getMessageHandler() {

@@ -80,7 +80,6 @@ public abstract class MessageHandler extends SimpleChannelInboundHandler<ByteBuf
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         // TODO catch channel disconnect
         if(cause instanceof IOException) {
-            System.out.println("Channel Disconnected");
             return;
         }
         super.exceptionCaught(ctx, cause);
