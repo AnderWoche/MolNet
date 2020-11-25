@@ -19,7 +19,7 @@ public class ServerClientProviderTest {
         Server server = new Server(3458);
 
         try {
-            server.provideFile("fileName", Paths.get("C:\\Users\\david\\Videos")); // C:\Users\david\Videos\Ein Video.mkv
+            server.provideFile("fileName", Paths.get("C:\\Users\\david\\Videos\\Ein Video.mkv")); // C:\Users\david\Videos\Ein Video.mkv
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -29,6 +29,12 @@ public class ServerClientProviderTest {
         Client client = new Client("localhost", 3458);
 
         client.connect().addListener((channelListener) -> {
+            if(channelListener.isSuccess()) {
+                System.out.println("[CLIENT] connected");
+            }
+        });
+
+        new Thread(() -> {
             System.out.println("send");
             FileDownloadProcessor fileDownloadProcessor = client.requestFile(client.getChannel(), "fileName", Paths.get("C:\\Users\\david\\Desktop"));
             fileDownloadProcessor.addListener(new FileDownloadListener() {
@@ -55,7 +61,11 @@ public class ServerClientProviderTest {
                     }
                 }
             });
-        });
+
+            fileDownloadProcessor.sync();
+
+            System.out.println("TEST!");
+        }).start();
 
     }
 }

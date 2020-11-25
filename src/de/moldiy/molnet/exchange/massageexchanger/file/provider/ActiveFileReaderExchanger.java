@@ -105,12 +105,12 @@ public class ActiveFileReaderExchanger {
     }
 
     @TrafficID(id = FileExchangerConstants.ACTIVE_FILE_PACKET_DO_NOT_EXISTS)
-    public void net_FilePacketNameNotExists(NetworkInterface networkInterface, ChannelHandlerContext ctx, ByteBuf byteBuf) {
+    private void net_FilePacketNameNotExists(NetworkInterface networkInterface, ChannelHandlerContext ctx, ByteBuf byteBuf) {
         this.fileDownloadDoneWithException(new PacketNameDoNotExists("The " + this.activeProcessor.getName() + " FilePacket name do not exists on the Server."));
     }
 
     private File getFileLocation(String path) throws IOException {
-        Path p = Paths.get(this.activeProcessor.getDirectory() + path);
+        Path p = Paths.get(this.activeProcessor.getDirectory().toString(), path);
 
         Path folders = p.resolveSibling("");
         Files.createDirectories(folders);
