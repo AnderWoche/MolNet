@@ -19,7 +19,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ActiveFileReaderExchanger {
+public class ProviderFileReaderExchanger {
 
     private final List<FileDownloadProcessor> processors = new ArrayList<>();
     private FileDownloadProcessor activeProcessor;

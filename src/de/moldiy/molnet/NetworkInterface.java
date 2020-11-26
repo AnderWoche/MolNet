@@ -1,8 +1,8 @@
 package de.moldiy.molnet;
 
 import de.moldiy.molnet.exchange.RightIDFactory;
-import de.moldiy.molnet.exchange.massageexchanger.file.provider.ActiveFileProviderExchanger;
-import de.moldiy.molnet.exchange.massageexchanger.file.provider.ActiveFileReaderExchanger;
+import de.moldiy.molnet.exchange.massageexchanger.file.provider.ProviderFileExchanger;
+import de.moldiy.molnet.exchange.massageexchanger.file.provider.ProviderFileReaderExchanger;
 import de.moldiy.molnet.exchange.massageexchanger.file.provider.FileDownloadProcessor;
 import de.moldiy.molnet.exchange.massageexchanger.file.passive.PassiveFileSenderExchanger;
 import io.netty.buffer.ByteBuf;
@@ -62,19 +62,11 @@ public abstract class NetworkInterface implements AdvancedMessageWriter {
     }
 
     public void provideFile(String name, Path path) throws IOException {
-        this.getMessageExchanger(ActiveFileProviderExchanger.class).provide(name, path);
+        this.getMessageExchanger(ProviderFileExchanger.class).provide(name, path);
     }
 
     public FileDownloadProcessor requestFile(Channel channel, String name, Path directory) {
-        return this.getMessageExchanger(ActiveFileReaderExchanger.class).requestFile(this, channel, name, directory);
-    }
-
-    public boolean isServer() {
-        return this instanceof Server;
-    }
-
-    public boolean isClient() {
-        return this instanceof Client;
+        return this.getMessageExchanger(ProviderFileReaderExchanger.class).requestFile(this, channel, name, directory);
     }
 
     public abstract void broadcastFile(String path, String file) throws IOException;
@@ -89,5 +81,13 @@ public abstract class NetworkInterface implements AdvancedMessageWriter {
 
     public ChannelIdentifierManager getChannelIdentifierManager() {
         return channelIdentifierManager;
+    }
+
+    public boolean isServer() {
+        return this instanceof Server;
+    }
+
+    public boolean isClient() {
+        return this instanceof Client;
     }
 }

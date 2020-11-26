@@ -1,5 +1,6 @@
 package de.moldiy.molnet;
 
+import de.moldiy.molnet.exchange.DTOSerializer;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 
@@ -20,6 +21,10 @@ public interface MessageWriter {
 
     default void writeAndFlush(Channel channel, String trafficID) {
         this.writeAndFlush(channel, trafficID, channel.alloc().buffer());
+    }
+
+    default  <T extends DTOSerializer> void writeAndFlush(Channel channel, String trafficID, T message) {
+        this.writeAndFlush(channel, trafficID, message.serialize(channel.alloc().buffer()));
     }
 
     default void flush(Channel channel) {

@@ -20,6 +20,8 @@ public class MolNetMethodHandle {
 
     private final Class<? extends Annotation>[] annotationsClasses;
 
+    private final Class<?> messageParameterType;
+
     public MolNetMethodHandle(Object object, Method m, BitVector rightsRequired) {
         this.object = object;
         this.rightsRequired = rightsRequired;
@@ -29,6 +31,8 @@ public class MolNetMethodHandle {
         for(int i = 0; i < annotationsClasses.length; i++) {
             this.annotationsClasses[i] = annotations[i].annotationType();
         }
+
+        this.messageParameterType = m.getParameterTypes()[2]; // 0 NetworkInterface networkInterface,  1 ChannelHandlerContext ctx,  2 ByteBuf message
 
         try {
             methodHandle = lookup.unreflect(m);
@@ -73,6 +77,10 @@ public class MolNetMethodHandle {
 
     public BitVector getRightsRequired() {
         return rightsRequired;
+    }
+
+    public Class<?> getMessageParameterType() {
+        return messageParameterType;
     }
 
     public static class NoAccessRightsException extends RuntimeException {

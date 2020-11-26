@@ -9,9 +9,6 @@ import io.netty.channel.SimpleChannelInboundHandler;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @ChannelHandler.Sharable
 public abstract class MessageHandler extends SimpleChannelInboundHandler<ByteBuf> {
@@ -20,11 +17,12 @@ public abstract class MessageHandler extends SimpleChannelInboundHandler<ByteBuf
 
     private MessageExchangerManager messageExchangerManager;
 
-    private final ExecutorService executorService = Executors.newCachedThreadPool();
+    private MolNetMethodHandleInvoker molNetMethodHandleInvoker;
 
     void setNetworkInterface(NetworkInterface networkInterface) {
         this.networkInterface = networkInterface;
         this.messageExchangerManager = new MessageExchangerManagerImpl(networkInterface.rightIDFactory);
+        this.molNetMethodHandleInvoker = new MolNetMethodHandleInvoker(this.networkInterface);
     }
 
     public NetworkInterface getNetworkInterface() {
@@ -86,20 +84,7 @@ public abstract class MessageHandler extends SimpleChannelInboundHandler<ByteBuf
     }
 
     private void invokeRightRestrictedMethodHandle(MolNetMethodHandle methodHandle, ChannelHandlerContext ctx, ByteBuf byteBuf) throws Throwable {
-        BitVector rightBits = this.getRightBitsFromChannel(ctx);
-        if(methodHandle.isAnnotationPresents(Threaded.class)) {
-            ByteBuf copiedByteBuff = byteBuf.copy();
-            this.executorService.execute(() -> {
-                try {
-                    methodHandle.invoke(rightBits, this.networkInterface, ctx, copiedByteBuff);
-                    copiedByteBuff.release();
-                } catch (Throwable throwable) {
-                    throwable.printStackTrace();
-                }
-            });
-        } else {
-            methodHandle.invoke(rightBits, this.networkInterface, ctx, byteBuf);
-        }
+        this.molNetMethodHandleInvoker.invokeMethod(this.getRightBitsFromChannel(ctx), methodHandle, ctx, byteBuf);
     }
 
     public MessageExchangerManager getMessageExchangerManager() {

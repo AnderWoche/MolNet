@@ -1,7 +1,7 @@
 package de.moldiy.molnet;
 
 
-import de.moldiy.molnet.exchange.massageexchanger.file.provider.ActiveFileProviderExchanger;
+import de.moldiy.molnet.exchange.massageexchanger.file.provider.ProviderFileExchanger;
 import de.moldiy.molnet.exchange.massageexchanger.file.passive.PassiveFileSenderExchanger;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
@@ -38,7 +38,7 @@ public class Server extends NetworkInterface {
         messageHandler.setNetworkInterface(this);
         messageHandler.getMessageExchangerManager().setServerFilter();
         messageHandler.loadMessageExchanger(new PassiveFileSenderExchanger());
-        messageHandler.loadMessageExchanger(new ActiveFileProviderExchanger());
+        messageHandler.loadMessageExchanger(new ProviderFileExchanger());
 
         this.serverBootstrap = new ServerBootstrap();
         EventLoopGroup bossGroup = new NioEventLoopGroup();

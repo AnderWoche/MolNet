@@ -15,7 +15,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 
-public class ActiveFileProviderExchanger {
+public class ProviderFileExchanger {
 
     private final HashMap<String, FilePacket> providedFiles = new HashMap<>();
 

@@ -20,8 +20,12 @@ repositories {
 }
 
 dependencies {
-    // https://mvnrepository.com/artifact/io.netty/netty-all
-    api group: 'io.netty', name: 'netty-all', version: '4.1.51.Final'
     implementation 'junit:junit:4.12'
+
+    api group: 'io.netty', name: 'netty-all', version: '4.1.51.Final'
+
+    // https://mvnrepository.com/artifact/net.dermetfan.libgdx-utils/libgdx-utils
+//    api group: 'net.dermetfan.libgdx-utils', name: 'libgdx-utils', version: '0.13.4'
+    api "com.badlogicgames.gdx:gdx:1.9.11"
 
 }
