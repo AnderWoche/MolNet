@@ -54,10 +54,9 @@ public class DTOTest {
         client.connect().addListener((channelListener) -> {
             if(channelListener.isSuccess()) {
                 System.out.println("[CLIENT] connected");
-                TestDTO dto = Pools.obtain(TestDTO.class);
+                TestDTO dto = client.obtainDTO(TestDTO.class);
                 dto.setId(100100);
-                client.writeAndFlush(client.getChannel(), "id", dto);
-                Pools.free(dto);
+                client.writeAndFlushAndFreeObject(client.getChannel(), "id", dto);
             }
         });
 

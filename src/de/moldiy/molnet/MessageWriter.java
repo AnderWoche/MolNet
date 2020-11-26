@@ -1,5 +1,6 @@
 package de.moldiy.molnet;
 
+import com.badlogic.gdx.utils.Pools;
 import de.moldiy.molnet.exchange.DTOSerializer;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -23,8 +24,17 @@ public interface MessageWriter {
         this.writeAndFlush(channel, trafficID, channel.alloc().buffer());
     }
 
-    default  <T extends DTOSerializer> void writeAndFlush(Channel channel, String trafficID, T message) {
+    default <T extends DTOSerializer> void writeAndFlush(Channel channel, String trafficID, T message) {
         this.writeAndFlush(channel, trafficID, message.serialize(channel.alloc().buffer()));
+    }
+
+    default <T extends DTOSerializer> void writeAndFlushAndFreeObject(Channel channel, String trafficID, T message) {
+        this.writeAndFlush(channel, trafficID, message.serialize(channel.alloc().buffer()));
+        Pools.free(message);
+    }
+
+    default <T extends DTOSerializer> T obtainDTO(Class<T> DTOClass) {
+        return Pools.obtain(DTOClass);
     }
 
     default void flush(Channel channel) {
