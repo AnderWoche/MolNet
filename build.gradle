@@ -26,6 +26,5 @@ dependencies {
 
     // https://mvnrepository.com/artifact/net.dermetfan.libgdx-utils/libgdx-utils
 //    api group: 'net.dermetfan.libgdx-utils', name: 'libgdx-utils', version: '0.13.4'
-    api "com.badlogicgames.gdx:gdx:1.9.11"
 
 }

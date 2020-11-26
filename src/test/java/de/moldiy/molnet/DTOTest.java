@@ -1,6 +1,5 @@
 package de.moldiy.molnet;
 
-import com.badlogic.gdx.utils.Pools;
 import de.moldiy.molnet.exchange.DTOSerializer;
 import de.moldiy.molnet.exchange.TrafficID;
 import io.netty.buffer.ByteBuf;
@@ -56,7 +55,7 @@ public class DTOTest {
                 System.out.println("[CLIENT] connected");
                 TestDTO dto = client.obtainDTO(TestDTO.class);
                 dto.setId(100100);
-                client.writeAndFlushAndFreeObject(client.getChannel(), "id", dto);
+                client.writeAndFlushDTO(client.getChannel(), "id", dto);
             }
         });
 

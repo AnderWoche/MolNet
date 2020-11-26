@@ -1,6 +1,7 @@
 package de.moldiy.molnet;
 
 
+import de.moldiy.molnet.exchange.DTOSerializer;
 import de.moldiy.molnet.exchange.massageexchanger.file.provider.ProviderFileExchanger;
 import de.moldiy.molnet.exchange.massageexchanger.file.passive.PassiveFileSenderExchanger;
 import io.netty.bootstrap.ServerBootstrap;
@@ -83,7 +84,7 @@ public class Server extends NetworkInterface {
     }
 
     @Override
-    public void broadCastMassage(String trafficID, ByteBuf byteBuf) {
+    public void broadcastMassage(String trafficID, ByteBuf byteBuf) {
         this.getAllClients().writeAndFlush(NettyByteBufUtil.addStringBeforeMassage(trafficID, byteBuf));
     }
 
@@ -94,7 +95,12 @@ public class Server extends NetworkInterface {
         }
     }
 
-
+    @Override
+    public <T extends DTOSerializer> void broadcastDTO(String trafficID, T dto) {
+        for(Channel channel : this.getAllClients()) {
+            super.writeAndFlushDTO(channel, trafficID, dto);
+        }
+    }
 
     public ChannelGroup getAllClients() {
         return this.allClients;

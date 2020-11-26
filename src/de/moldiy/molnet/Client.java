@@ -1,5 +1,6 @@
 package de.moldiy.molnet;
 
+import de.moldiy.molnet.exchange.DTOSerializer;
 import de.moldiy.molnet.exchange.massageexchanger.file.provider.ProviderFileReaderExchanger;
 import de.moldiy.molnet.exchange.massageexchanger.file.passive.PassiveFileReceiverExchanger;
 import de.moldiy.molnet.exchange.massageexchanger.file.passive.PassiveFileSenderExchanger;
@@ -82,13 +83,18 @@ public class Client extends NetworkInterface {
     }
 
     @Override
-    public void broadCastMassage(String trafficID, ByteBuf byteBuf) {
+    public void broadcastMassage(String trafficID, ByteBuf byteBuf) {
         this.writeAndFlush(c, trafficID, byteBuf);
     }
 
     @Override
     public void broadcastFile(String path, String file) throws IOException {
         this.getMessageExchanger(PassiveFileSenderExchanger.class).sendFile(this.c, path, file);
+    }
+
+    @Override
+    public <T extends DTOSerializer> void broadcastDTO(String trafficID, T dto) {
+        this.writeAndFlushDTO(this.c, trafficID, dto);
     }
 
     public Channel getChannel() {

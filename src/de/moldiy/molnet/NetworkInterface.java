@@ -12,7 +12,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public abstract class NetworkInterface implements AdvancedMessageWriter {
+public abstract class NetworkInterface implements NetworkInterfaceMessageWriter {
 
     protected final MessageHandler messageHandler;
 

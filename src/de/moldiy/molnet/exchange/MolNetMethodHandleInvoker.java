@@ -1,8 +1,8 @@
 package de.moldiy.molnet.exchange;
 
-import com.badlogic.gdx.utils.Pools;
 import de.moldiy.molnet.NetworkInterface;
 import de.moldiy.molnet.utils.BitVector;
+import de.moldiy.molnet.utils.gdx.Pools;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 
