@@ -6,6 +6,7 @@ import de.moldiy.molnet.utils.MapArray;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +14,7 @@ import java.util.Map;
 public abstract class MessageExchangerManager {
 
     private Class<? extends Annotation> filterType;
-    private final Map<Class<?>, Object> massageExchangerMap = new IdentityHashMap<>();
+    private final Map<Class<?>, Object> messageExchangerMap = new IdentityHashMap<>();
     private final MapArray<Class<? extends Annotation>, MolNetMethodHandle> annotationToMethodsMap = new MapArray<>();
     private final BothSideHashMapWithArray<String, MolNetMethodHandle> idMethods = new BothSideHashMapWithArray<>(true);
 
@@ -26,7 +27,7 @@ public abstract class MessageExchangerManager {
     public synchronized void loadMessageExchanger(Object object) {
         assert object != null;
 
-        this.massageExchangerMap.put(object.getClass(), object);
+        this.messageExchangerMap.put(object.getClass(), object);
 
         for (Method m : object.getClass().getDeclaredMethods()) {
             m.setAccessible(true);
@@ -110,7 +111,11 @@ public abstract class MessageExchangerManager {
 
     @SuppressWarnings("unchecked")
     public <T> T getMassageExchanger(Class<T> objectClass) {
-        return (T) this.massageExchangerMap.get(objectClass);
+        return (T) this.messageExchangerMap.get(objectClass);
+    }
+
+    public Collection<Object> getAllMessageExchanger() {
+        return this.messageExchangerMap.values();
     }
 
     public List<MolNetMethodHandle> getMethodsFromAnnotation(Class<? extends Annotation> annotation) {
