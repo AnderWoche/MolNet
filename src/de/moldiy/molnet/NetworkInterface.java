@@ -11,6 +11,7 @@ import io.netty.channel.Channel;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Collection;
 
 public abstract class NetworkInterface implements NetworkInterfaceMessageWriter {
 
@@ -30,6 +31,10 @@ public abstract class NetworkInterface implements NetworkInterfaceMessageWriter 
 
     public <T> T getMessageExchanger(Class<T> objectClass) {
         return this.messageHandler.getMessageExchangerManager().getMassageExchanger(objectClass);
+    }
+
+    public Collection<Object> getAllMessageExchanger() {
+        return this.messageHandler.getMessageExchangerManager().getAllMessageExchanger();
     }
 
     public <T> Channel getChannel(String identifierName, T value) {
