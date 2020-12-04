@@ -8,6 +8,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @ChannelHandler.Sharable
@@ -18,6 +19,8 @@ public abstract class MessageHandler extends SimpleChannelInboundHandler<ByteBuf
     private MessageExchangerManager messageExchangerManager;
 
     private MolNetMethodHandleInvoker molNetMethodHandleInvoker;
+
+    private final List<ChannelConnectedListener> channelConnectedListeners = new ArrayList<>();
 
     void setNetworkInterface(NetworkInterface networkInterface) {
         this.networkInterface = networkInterface;
@@ -50,6 +53,7 @@ public abstract class MessageHandler extends SimpleChannelInboundHandler<ByteBuf
                 }
             }
         }
+        this.notifyChannelConnectedListener(ctx);
         super.channelActive(ctx);
     }
 
@@ -93,6 +97,20 @@ public abstract class MessageHandler extends SimpleChannelInboundHandler<ByteBuf
 
     public void loadMessageExchanger(Object object) {
         this.messageExchangerManager.loadMessageExchanger(object);
+    }
+
+    public void addChannelConnectedListener(ChannelConnectedListener channelConnectedListener) {
+        this.channelConnectedListeners.add(channelConnectedListener);
+    }
+
+    public void removeChannelConnectedListener(ChannelConnectedListener channelConnectedListener) {
+        this.channelConnectedListeners.remove(channelConnectedListener);
+    }
+
+    public void notifyChannelConnectedListener(ChannelHandlerContext ctx) {
+        for(ChannelConnectedListener channelConnectedListener : this.channelConnectedListeners) {
+            channelConnectedListener.channelConnected(ctx);
+        }
     }
 
 }
