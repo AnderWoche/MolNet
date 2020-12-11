@@ -63,7 +63,7 @@ public abstract class NetworkInterface implements NetworkInterfaceMessageWriter 
     }
 
     @Override
-    public <T extends DTOSerializer> void writeAndFlush(String identifierName, T value, String trafficID, T dto) {
+    public <A, T extends DTOSerializer> void writeAndFlush(String identifierName, A value, String trafficID, T dto) {
         Channel channel = this.channelIdentifierManager.getChannel(identifierName, value);
         this.writeAndFlush(channel, trafficID, dto);
     }

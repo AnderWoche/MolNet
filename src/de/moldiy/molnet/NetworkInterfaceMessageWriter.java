@@ -22,7 +22,7 @@ public interface NetworkInterfaceMessageWriter extends MessageWriter {
         Pools.free(dto);
     }
 
-    <T extends DTOSerializer> void writeAndFlush(String identifierName, T value, String trafficID, T dto);
+    <A, T extends DTOSerializer> void writeAndFlush(String identifierName, A value, String trafficID, T dto);
 
     <T extends DTOSerializer> void broadcast(String trafficID, T dto);
 
