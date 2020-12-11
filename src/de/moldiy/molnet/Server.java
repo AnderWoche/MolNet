@@ -96,9 +96,9 @@ public class Server extends NetworkInterface {
     }
 
     @Override
-    public <T extends DTOSerializer> void broadcastDTO(String trafficID, T dto) {
+    public <T extends DTOSerializer> void broadcast(String trafficID, T dto) {
         for(Channel channel : this.getAllClients()) {
-            super.writeAndFlushDTO(channel, trafficID, dto);
+            super.writeAndFlush(channel, trafficID, dto);
         }
     }
 

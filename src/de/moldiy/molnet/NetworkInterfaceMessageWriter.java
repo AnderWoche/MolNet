@@ -17,13 +17,13 @@ public interface NetworkInterfaceMessageWriter extends MessageWriter {
         return Pools.obtain(DTOClass);
     }
 
-    default <T extends DTOSerializer> void writeAndFlushDTO(Channel channel, String trafficID, T dto) {
+    default <T extends DTOSerializer> void writeAndFlush(Channel channel, String trafficID, T dto) {
         writeAndFlush(channel, trafficID, dto.serialize(channel.alloc().buffer()));
         Pools.free(dto);
     }
 
-    <T extends DTOSerializer> void writeAndFlushDTO(String identifierName, T value, String trafficID, T dto);
+    <T extends DTOSerializer> void writeAndFlush(String identifierName, T value, String trafficID, T dto);
 
-    <T extends DTOSerializer> void broadcastDTO(String trafficID, T dto);
+    <T extends DTOSerializer> void broadcast(String trafficID, T dto);
 
 }

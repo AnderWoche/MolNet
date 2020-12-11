@@ -93,8 +93,8 @@ public class Client extends NetworkInterface {
     }
 
     @Override
-    public <T extends DTOSerializer> void broadcastDTO(String trafficID, T dto) {
-        this.writeAndFlushDTO(this.c, trafficID, dto);
+    public <T extends DTOSerializer> void broadcast(String trafficID, T dto) {
+        this.writeAndFlush(this.c, trafficID, dto);
     }
 
     public Channel getChannel() {

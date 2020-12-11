@@ -55,7 +55,7 @@ public class DTOTest {
                 System.out.println("[CLIENT] connected");
                 TestDTO dto = client.obtainDTO(TestDTO.class);
                 dto.setId(100100);
-                client.writeAndFlushDTO(client.getChannel(), "id", dto);
+                client.writeAndFlush(client.getChannel(), "id", dto);
             }
         });
 
