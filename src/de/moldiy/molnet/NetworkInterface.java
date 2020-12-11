@@ -1,5 +1,6 @@
 package de.moldiy.molnet;
 
+import de.moldiy.molnet.exchange.DTOSerializer;
 import de.moldiy.molnet.exchange.RightIDFactory;
 import de.moldiy.molnet.exchange.massageexchanger.file.provider.ProviderFileExchanger;
 import de.moldiy.molnet.exchange.massageexchanger.file.provider.ProviderFileReaderExchanger;
@@ -59,6 +60,12 @@ public abstract class NetworkInterface implements NetworkInterfaceMessageWriter 
     public <T> void writeAndFlush(String identifierName, T value, String trafficID) {
         Channel channel = this.channelIdentifierManager.getChannel(identifierName, value);
         this.writeAndFlush(channel, trafficID, channel.alloc().buffer());
+    }
+
+    @Override
+    public <T extends DTOSerializer> void writeAndFlushDTO(String identifierName, T value, String trafficID, T dto) {
+        Channel channel = this.channelIdentifierManager.getChannel(identifierName, value);
+        this.writeAndFlushDTO(channel, trafficID, dto);
     }
 
     @Override
